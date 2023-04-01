@@ -1,0 +1,412 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<robot name="xarm7_with_gripper">
+  <material name="White">
+    <color rgba="1 1 1 1" />
+  </material>
+  <material name="Silver">
+    <color rgba="0.753 0.753 0.753 1" />
+  </material>
+  <link name="world" />
+  <link name="link_base">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.021131 -0.00163 0.056488" />
+      <mass value="0.8855600357" />
+      <inertia ixx="0.00305984541773796" ixy="0.000125649079564027" ixz="-0.000626734748948365" iyy="0.00377832446247339" iyz="0.000268803822109476" izz="0.00201213033869863" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://meshes/link_base.STL" scale="1 1 1" />
+      </geometry>
+      <material name="White" />
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://meshes/link_base.STL" scale="1 1 1" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="link1">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.004214 0.02821 -0.008779" />
+      <mass value="0.4260300398" />
+      <inertia ixx="0.00144438177812845" ixy="1.44985979204648E-05" ixz="2.21778136619832E-05" iyy="0.00121462112292647" iyz="-0.000252082012593746" izz="0.000987587496638298" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://meshes/link1.STL" scale="1 1 1" />
+      </geometry>
+      <material name="White" />
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://meshes/link1.STL" scale="1 1 1" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="link2">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-3.3E-05 -0.12849 0.026337" />
+      <mass value="0.5609499812" />
+      <inertia ixx="0.00319150509312749" ixy="3.35890285896312E-06" ixz="2.5123320028797E-06" iyy="0.00174679921474308" iyz="-0.00102409790270031" izz="0.00234999600797892" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://meshes/link2.STL" scale="1 1 1" />
+      </geometry>
+      <material name="White" />
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://meshes/link2.STL" scale="1 1 1" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="link3">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.04223 -0.023258 -0.009667" />
+      <mass value="0.4446299672" />
+      <inertia ixx="0.001152143930085" ixy="0.00018947638454847" ixz="-0.000176192494109273" iyy="0.00106839323416352" iyz="0.000115088478196412" izz="0.00108346377965063" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://meshes/link3.STL" scale="1 1 1" />
+      </geometry>
+      <material name="White" />
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://meshes/link3.STL" scale="1 1 1" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="link4">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.067148 -0.10732 0.024479" />
+      <mass value="0.5238699913" />
+      <inertia ixx="0.00260330177843571" ixy="0.00053378997836262" ixz="0.000363140628905967" iyy="0.00176489935256541" iyz="-0.000832529040053487" izz="0.00224309950135648" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://meshes/link4.STL" scale="1 1 1" />
+      </geometry>
+      <material name="White" />
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://meshes/link4.STL" scale="1 1 1" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="link5">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.000234 0.036705 -0.080064" />
+      <mass value="0.1855400056" />
+      <inertia ixx="0.000995531328953803" ixy="4.20790200905685E-07" ixz="1.04559330793563E-06" iyy="0.000885264365933836" iyz="-0.000256806437391788" izz="0.000350474991137162" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://meshes/link5.STL" scale="1 1 1" />
+      </geometry>
+      <material name="White" />
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://meshes/link5.STL" scale="1 1 1" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="link6">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.058911 0.028469 0.006843" />
+      <mass value="0.3134399951" />
+      <inertia ixx="0.000520339992363006" ixy="-0.000149890169268474" ixz="0.00011657992581604" iyy="0.000679680262692273" iyz="6.11599898547865E-05" izz="0.000783450086601079" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://meshes/link6.STL" scale="1 1 1" />
+      </geometry>
+      <material name="White" />
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://meshes/link6.STL" scale="1 1 1" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="link7">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-1.6E-05 -0.004638 -0.012705" />
+      <mass value="0.3146800101" />
+      <inertia ixx="0.000169850056408904" ixy="1.11020789006488E-07" ixz="5.10078024262839E-08" iyy="0.000119240066851489" iyz="-2.12510076380568E-06" izz="0.000260320084635168" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://meshes/link7.STL" scale="1 1 1" />
+      </geometry>
+      <material name="Silver" />
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://meshes/link7.STL" scale="1 1 1" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="link_eef" />
+  <link name="xarm_gripper_base_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.000655 -0.00185 0.048028" />
+      <mass value="0.5415599942" />
+      <inertia ixx="0.000471059902338311" ixy="3.83975532258773E-07" ixz="2.6549926133157E-06" iyy="0.000330719951307401" iyz="-1.09750908450224E-05" izz="0.000256419996730983" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://meshes/base_link.STL" scale="1 1 1" />
+      </geometry>
+      <material name="White" />
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://meshes/base_link.STL" scale="1 1 1" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="left_outer_knuckle">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0.021559 0.015181" />
+      <mass value="0.0336179994" />
+      <inertia ixx="1.91109957086155E-05" ixy="-1.9459769671806E-17" ixz="-9.98696264411714E-18" iyy="6.62559978081845E-06" iyz="-7.3008009167097E-06" izz="1.31850010802737E-05" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://meshes/left_outer_knuckle.STL" scale="1 1 1" />
+      </geometry>
+      <material name="Silver" />
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://meshes/left_outer_knuckle.STL" scale="1 1 1" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="left_finger">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 -0.016413 0.029258" />
+      <mass value="0.048303999" />
+      <inertia ixx="1.74930064531509E-05" ixy="-1.88901541978148E-12" ixz="-2.10170054103231E-12" iyy="1.72250038303901E-05" iyz="4.64330105387489E-06" izz="5.14660223416286E-06" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://meshes/left_finger.STL" scale="1 1 1" />
+      </geometry>
+      <material name="Silver" />
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://meshes/left_finger.STL" scale="1 1 1" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="left_inner_knuckle">
+    <inertial>
+      <origin rpy="0 0 0" xyz="2E-06 0.022047 0.026133" />
+      <mass value="0.0230125785" />
+      <inertia ixx="6.09490007263958E-06" ixy="6.08416719782845E-11" ixz="7.18907988694895E-11" iyy="6.01955071033444E-06" iyz="-2.75316847364593E-06" izz="5.07862114318414E-06" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://meshes/left_inner_knuckle.STL" scale="1 1 1" />
+      </geometry>
+      <material name="Silver" />
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://meshes/left_inner_knuckle.STL" scale="1 1 1" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="right_outer_knuckle">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 -0.021559 0.015181" />
+      <mass value="0.0336179994" />
+      <inertia ixx="1.91109957086155E-05" ixy="-1.70669594984555E-17" ixz="1.36473989820644E-17" iyy="6.62559978081845E-06" iyz="7.3008009167097E-06" izz="1.31850010802737E-05" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://meshes/right_outer_knuckle.STL" scale="1 1 1" />
+      </geometry>
+      <material name="Silver" />
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://meshes/right_outer_knuckle.STL" scale="1 1 1" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="right_finger">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0.016413 0.029258" />
+      <mass value="0.048303999" />
+      <inertia ixx="1.74929937202251E-05" ixy="3.62604342168601E-13" ixz="2.3300507573723E-13" iyy="1.72250056493795E-05" iyz="-4.64350250695134E-06" izz="5.14660177941551E-06" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://meshes/right_finger.STL" scale="1 1 1" />
+      </geometry>
+      <material name="Silver" />
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://meshes/right_finger.STL" scale="1 1 1" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="right_inner_knuckle">
+    <inertial>
+      <origin rpy="0 0 0" xyz="2E-06 -0.022047 0.026133" />
+      <mass value="0.0230129994" />
+      <inertia ixx="6.09490007263958E-06" ixy="-6.06909036915404E-11" ixz="7.14893214071033E-11" iyy="6.01970032221288E-06" iyz="2.75310003416962E-06" izz="5.07840104546631E-06" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://meshes/right_inner_knuckle.STL" scale="1 1 1" />
+      </geometry>
+      <material name="Silver" />
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://meshes/right_inner_knuckle.STL" scale="1 1 1" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="link_tcp" />
+  <joint name="world_link_base_joint" type="fixed">
+    <parent link="world" />
+    <child link="link_base" />
+  </joint>
+  <joint name="joint1" type="revolute">
+    <origin xyz="0 0 0.267" />
+    <parent link="link_base" />
+    <child link="link1" />
+    <axis xyz="0 0 1" />
+    <dynamics damping="10" friction="1" />
+    <limit lower="-6.283185" upper="6.283185" effort="1000" velocity="1000" />
+  </joint>
+  <joint name="joint2" type="revolute">
+    <origin rpy="-1.5708 0 0" />
+    <parent link="link1" />
+    <child link="link2" />
+    <axis xyz="0 0 1" />
+    <dynamics damping="10" friction="1" />
+    <limit lower="-2.059" upper="2.0944" effort="1000" velocity="1000" />
+  </joint>
+  <joint name="joint3" type="revolute">
+    <origin rpy="-4.712385 0 0" xyz="0 -0.293 0" />
+    <parent link="link2" />
+    <child link="link3" />
+    <axis xyz="0 0 1" />
+    <dynamics damping="5" friction="1" />
+    <limit lower="-6.283185" upper="6.283185" effort="1000" velocity="1000" />
+  </joint>
+  <joint name="joint4" type="revolute">
+    <origin rpy="-4.712385 0 0" xyz="0.0525 0 0" />
+    <parent link="link3" />
+    <child link="link4" />
+    <axis xyz="0 0 1" />
+    <dynamics damping="5" friction="1" />
+    <limit lower="-0.19198" upper="3.927" effort="1000" velocity="1000" />
+  </joint>
+  <joint name="joint5" type="revolute">
+    <origin rpy="-4.712385 0 0" xyz="0.0775 -0.3425 0" />
+    <parent link="link4" />
+    <child link="link5" />
+    <axis xyz="0 0 1" />
+    <dynamics damping="5" friction="1" />
+    <limit lower="-6.283185" upper="6.283185" effort="1000" velocity="1000" />
+  </joint>
+  <joint name="joint6" type="revolute">
+    <origin rpy="-4.712385 0 0" />
+    <parent link="link5" />
+    <child link="link6" />
+    <axis xyz="0 0 1" />
+    <dynamics damping="2" friction="1" />
+    <limit lower="-1.69297" upper="3.141593" effort="1000" velocity="1000" />
+  </joint>
+  <joint name="joint7" type="revolute">
+    <origin rpy="-1.5708 0 0" xyz="0.076 0.097 0" />
+    <parent link="link6" />
+    <child link="link7" />
+    <axis xyz="0 0 1" />
+    <dynamics damping="2" friction="1" />
+    <limit lower="-6.283185" upper="6.283185" effort="1000" velocity="1000" />
+  </joint>
+  <joint name="link7_link_eef_joint" type="fixed">
+    <parent link="link7" />
+    <child link="link_eef" />
+  </joint>
+  <joint name="link_eef_xarm_gripper_base_link_joint" type="fixed">
+    <parent link="link_eef" />
+    <child link="xarm_gripper_base_link" />
+  </joint>
+  <joint name="drive_joint" type="revolute">
+    <origin xyz="0 0.035 0.059098" />
+    <parent link="xarm_gripper_base_link" />
+    <child link="left_outer_knuckle" />
+    <axis xyz="1 0 0" />
+    <limit lower="0" upper="0.45" effort="1000" velocity="1000" />
+  </joint>
+  <joint name="left_finger_joint" type="fixed">
+    <origin xyz="0 0.035465 0.042039" />
+    <parent link="left_outer_knuckle" />
+    <child link="left_finger" />
+    <axis xyz="-1 0 0" />
+    <limit lower="0" upper="0.85" effort="1000" velocity="1000" />
+  </joint>
+  <!-- <joint name="left_inner_knuckle_joint" type="revolute">
+    <origin xyz="0 0.02 0.074098" />
+    <parent link="xarm_gripper_base_link" />
+    <child link="left_inner_knuckle" />
+    <axis xyz="1 0 0" />
+    <limit lower="0" upper="0.5" effort="1000" velocity="1000" />
+  </joint> -->
+  <joint name="left_inner_knuckle_joint" type="fixed">
+    <origin xyz="0 -0.055 -0.02" />
+    <parent link="left_finger" />
+    <child link="left_inner_knuckle" />
+    <axis xyz="1 0 0" />
+    <limit lower="0" upper="0.5" effort="1000" velocity="1000" />
+  </joint>
+  <joint name="right_outer_knuckle_joint" type="revolute">
+    <origin xyz="0 -0.035 0.059098" />
+    <parent link="xarm_gripper_base_link" />
+    <child link="right_outer_knuckle" />
+    <axis xyz="-1 0 0" />
+    <limit lower="0" upper="0.45" effort="1000" velocity="1000" />
+  </joint>
+  <joint name="right_finger_joint" type="fixed">
+    <origin xyz="0 -0.035465 0.042039" />
+    <parent link="right_outer_knuckle" />
+    <child link="right_finger" />
+    <axis xyz="1 0 0" />
+    <limit lower="0" upper="0.85" effort="1000" velocity="1000" />
+  </joint>
+  <!-- <joint name="right_inner_knuckle_joint" type="revolute">
+    <origin xyz="0 -0.02 0.074098" />
+    <parent link="xarm_gripper_base_link" />
+    <child link="right_inner_knuckle" />
+    <axis xyz="-1 0 0" />
+    <limit lower="0" upper="0.5" effort="1000" velocity="1000" />
+  </joint> -->
+  <joint name="right_inner_knuckle_joint" type="fixed">
+    <origin xyz="0 0.055 -0.02" />
+    <parent link="right_finger" />
+    <child link="right_inner_knuckle" />
+    <axis xyz="-1 0 0" />
+    <limit lower="0" upper="0.5" effort="1000" velocity="1000" />
+  </joint>
+  <joint name="xarm_gripper_base_link_link_tcp_joint" type="fixed">
+    <origin xyz="0 0 0.172" />
+    <parent link="xarm_gripper_base_link" />
+    <child link="link_tcp" />
+  </joint>
+ 
+</robot>

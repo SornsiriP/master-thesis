@@ -1,0 +1,15 @@
+README.md
+setup.py
+gym_xarm.egg-info/PKG-INFO
+gym_xarm.egg-info/SOURCES.txt
+gym_xarm.egg-info/dependency_links.txt
+gym_xarm.egg-info/requires.txt
+gym_xarm.egg-info/top_level.txt
+simple_xarm/__init__.py
+simple_xarm/envs/__init__.py
+simple_xarm/envs/panda_env.py
+simple_xarm/envs/xarm_env.py
+simple_xarm/envs/xarm_env_backup.py
+simple_xarm/envs/xarm_ik_env.py
+simple_xarm/resources/wrapper.py
+simple_xarm/resources/robot/Xarm.py
