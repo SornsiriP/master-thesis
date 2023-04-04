@@ -115,17 +115,36 @@ class XarmEnv(gym.Env):
         right_lower_bound = current_obj-(1,0.0,0.1)
         right_upper_bound = current_obj+(1,2,0.3)
 
-        p.addUserDebugLine(left_lower_bound,left_upper_bound, lifeTime = 0.1)
-        p.addUserDebugLine(right_lower_bound,right_upper_bound, lifeTime = 0.1)
+        # p.addUserDebugLine(left_lower_bound,left_upper_bound, lifeTime = 0.1)
+        # p.addUserDebugLine(right_lower_bound,right_upper_bound, lifeTime = 0.1)
         
-        if (left_lower_bound < left_finger).all() and (left_finger< left_upper_bound).all() and (right_lower_bound < (right_finger)).all() and (right_finger < right_upper_bound).all():
-            # print("***** grap posision *****")
-            if self.current_timeStep % 10 == 0:
-                if dist_fing<0.8:
-                    print("************grab**********")
-                    print("finger", dist_fing)
+        # if (left_lower_bound < left_finger).all() and (left_finger< left_upper_bound).all() and (right_lower_bound < (right_finger)).all() and (right_finger < right_upper_bound).all():
+        #     # print("***** grap posision *****")
+        #     if self.current_timeStep % 10 == 0:
+        #         if dist_fing<0.2:
+        #             print("************grab**********")
+        #             print("finger", dist_fing)
+        #     reward_gripper = (1.5-dist_fing) #0=open
+        #     if len(p.getContactPoints(self.object_id,self.xarm_id)) > 2:
+        #         reward_gripper = reward_gripper*2
+        # else: 
+        #     if dist_fing>.4:
+        #         reward_gripper = 0.1
+        #     else:reward_gripper = 0
+
+        # if (left_lower_bound < left_finger).all() and (left_finger< left_upper_bound).all() and (right_lower_bound < (right_finger)).all() and (right_finger < right_upper_bound).all():
+        #     # print("***** grap posision *****")
+        #     if self.current_timeStep % 10 == 0:
+        #         if dist_fing<0.2:
+        #             print("************grab**********")
+        #             print("finger", dist_fing)
+        
+        if len(p.getContactPoints(self.object_id,self.xarm_id)) > 2:
             reward_gripper = (1.5-dist_fing) #0=open
-            if len(p.getContactPoints(self.object_id,self.xarm_id)) > 2:
+            if self.current_timeStep % 10 == 0:
+                if dist_fing<0.5:
+                    print("************grab**********")
+            if (left_lower_bound < left_finger).all() and (left_finger< left_upper_bound).all() and (right_lower_bound < (right_finger)).all() and (right_finger < right_upper_bound).all():
                 reward_gripper = reward_gripper*2
         else: 
             if dist_fing>.4:
