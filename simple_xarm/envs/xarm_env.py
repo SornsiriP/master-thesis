@@ -99,10 +99,12 @@ class XarmEnv(gym.Env):
         # perc_dist_y =(self.distance_obj_start_y-distance_obj_goal_y)*100/self.distance_obj_start_y
         perc_dist_x = 100 - distance_obj_goal_x*100/self.distance_obj_start_x
         perc_dist_y = 100 - distance_obj_goal_y*100/self.distance_obj_start_y
-        reward_distance_gripper_obj = (perc_dist_x + perc_dist_y) / 2 * .01 * .5  #max = .5
-        # print(distance_obj_goal_x,distance_obj_goal_y)
-        # print(self.distance_obj_start_x,self.distance_obj_start_y)
-        # print(perc_dist_x,perc_dist_y)
+        reward_distance_gripper_obj = (perc_dist_x + perc_dist_y) / 2 * .01   #max = .5
+
+        # if self.current_timeStep % 10 == 0:
+        #     print(distance_obj_goal_x,distance_obj_goal_y)
+        #     print(self.distance_obj_start_x,self.distance_obj_start_y)
+        #     print("percent",perc_dist_x,perc_dist_y)
         # reward_distance_gripper_obj = (self.start_pos-((distance_obj_goal_x+distance_obj_goal_y)))/2 + (2-distance_obj_goal_z)
 
         distance_obj_goal = self.getDistance(goal_z, current_obj[2]) + 0.1
@@ -112,6 +114,9 @@ class XarmEnv(gym.Env):
         left_upper_bound = current_obj+(1,0.0,0.3)
         right_lower_bound = current_obj-(1,0.0,0.1)
         right_upper_bound = current_obj+(1,2,0.3)
+
+        p.addUserDebugLine(left_lower_bound,left_upper_bound, lifeTime = 0.1)
+        p.addUserDebugLine(right_lower_bound,right_upper_bound, lifeTime = 0.1)
         
         if (left_lower_bound < left_finger).all() and (left_finger< left_upper_bound).all() and (right_lower_bound < (right_finger)).all() and (right_finger < right_upper_bound).all():
             # print("***** grap posision *****")
@@ -128,10 +133,10 @@ class XarmEnv(gym.Env):
             else:reward_gripper = 0
 
         penalty_time = self.current_timeStep * 0.00001        
-        reward = reward_distance_obj_goal + reward_gripper + reward_distance_gripper_obj/2
+        reward = reward_distance_obj_goal + reward_gripper + reward_distance_gripper_obj
         # reward = reward_distance_gripper_obj + reward_distance_obj_goal + reward_gripper + reward_distance_obj_original
         Norm_reward = self.RewardNorm(reward)
-        if self.current_timeStep % 10 == 0:
+        if self.current_timeStep % 50 == 0:
             # print(current_obj[2])
             print("reward_distance_gripper_obj",reward_distance_gripper_obj)
             print("reward_distance_obj_goal ",reward_distance_obj_goal)
@@ -146,7 +151,7 @@ class XarmEnv(gym.Env):
         # motion_range = [-0.05,0.05]
         rew_range = [0,1]
         # gripper_range = [0.0,0.85]
-        reward = np.interp(reward,[0,3],rew_range)
+        reward = np.interp(reward,[0,2],rew_range)
         return reward
 
     def getObservation(self):
@@ -240,8 +245,8 @@ class XarmEnv(gym.Env):
         
         self.observation =  self.getObservation()
 
-        self.distance_obj_start_x = self.getDistance(self.base_position[0], self.observation[0][0])
-        self.distance_obj_start_y = self.getDistance(self.base_position[1], self.observation[0][1])
+        self.distance_obj_start_x = self.getDistance(self.observation[1][0], self.observation[0][0])
+        self.distance_obj_start_y = self.getDistance(self.observation[1][1], self.observation[0][1])
 
         eef_state = self.Xarm.getLinkPose(link_id=8)
         self.initial_eef_p3,self.initial_eef_q4 = eef_state[0],eef_state[1]
