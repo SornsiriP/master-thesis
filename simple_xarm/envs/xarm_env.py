@@ -56,6 +56,7 @@ class XarmEnv(gym.Env):
         p.stepSimulation()
 
         self.start_pos = self.base_position[0] + self.base_position[1]
+        
         current_pos, current_obj,_,_,dist_fing = self.getObservation()
 
         reward = self.calculateReward()
@@ -72,7 +73,7 @@ class XarmEnv(gym.Env):
             self.done = True
             self.current_timeStep =0
             reward = 1000/4*0.8
-        elif reward < -1:     #Softbody crash
+        elif reward < -1:     #Softbody crash #new reward dont have minus
             print("Soft body crash")
             self.done = True
             self.current_timeStep =0
@@ -93,24 +94,32 @@ class XarmEnv(gym.Env):
         distance_obj_goal_x = self.getDistance(current_obj[0], current_pos[0])
         distance_obj_goal_y = self.getDistance(current_obj[1], current_pos[1])
         distance_obj_goal_z = self.getDistance(current_obj[2], current_pos[2])  #offset
+        
+        # perc_dist_x = (self.distance_obj_start_x-distance_obj_goal_x)*100/self.distance_obj_start_x
+        # perc_dist_y =(self.distance_obj_start_y-distance_obj_goal_y)*100/self.distance_obj_start_y
+        perc_dist_x = 100 - distance_obj_goal_x*100/self.distance_obj_start_x
+        perc_dist_y = 100 - distance_obj_goal_y*100/self.distance_obj_start_y
+        reward_distance_gripper_obj = (perc_dist_x + perc_dist_y) / 2 * .01 * .5  #max = .5
+        # print(distance_obj_goal_x,distance_obj_goal_y)
+        # print(self.distance_obj_start_x,self.distance_obj_start_y)
+        # print(perc_dist_x,perc_dist_y)
+        # reward_distance_gripper_obj = (self.start_pos-((distance_obj_goal_x+distance_obj_goal_y)))/2 + (2-distance_obj_goal_z)
 
-        
-        reward_distance_gripper_obj = (self.start_pos-((distance_obj_goal_x+distance_obj_goal_y)))/2 + (2-distance_obj_goal_z)
-        
         distance_obj_goal = self.getDistance(goal_z, current_obj[2]) + 0.1
         reward_distance_obj_goal = (goal_z-distance_obj_goal)*3
 
-        left_lower_bound = current_obj-(0.1,0.1,-0.1)
-        left_upper_bound = current_obj+(0.1,0.0,0.1)
-        right_lower_bound = current_obj-(0.1,0.0,-0.1)
-        right_upper_bound = current_obj+(0.1,0.1,0.1)
+        left_lower_bound = current_obj-(1,2,0.1)
+        left_upper_bound = current_obj+(1,0.0,0.3)
+        right_lower_bound = current_obj-(1,0.0,0.1)
+        right_upper_bound = current_obj+(1,2,0.3)
+        
         if (left_lower_bound < left_finger).all() and (left_finger< left_upper_bound).all() and (right_lower_bound < (right_finger)).all() and (right_finger < right_upper_bound).all():
             # print("***** grap posision *****")
             if self.current_timeStep % 10 == 0:
                 if dist_fing<0.8:
                     print("************grab**********")
                     print("finger", dist_fing)
-            reward_gripper = (1-dist_fing) #0=open
+            reward_gripper = (1.5-dist_fing) #0=open
             if len(p.getContactPoints(self.object_id,self.xarm_id)) > 2:
                 reward_gripper = reward_gripper*2
         else: 
@@ -223,10 +232,17 @@ class XarmEnv(gym.Env):
         # self.object_id = p.loadSoftBody("tube.vtk", simFileName = "tube.vtk", basePosition = [2.5,-0.1,0.13],baseOrientation = [0,0,1,1], scale =0.5, mass = 1, 
         # useBendingSprings = 1,springBendingStiffness = 1, useNeoHookean = 1, NeoHookeanMu = 500, NeoHookeanLambda = 1000, NeoHookeanDamping = 0.002, useSelfCollision = 1, frictionCoeff = 3, collisionMargin = 0.001)
         self.base_position, self.base_orientation = self.random_start() 
+
+        
+        
         # print(base_position,"*****",base_orientation)
         self.object_id = self.add_noodle(pos = self.base_position, orientation=self.base_orientation)
         
         self.observation =  self.getObservation()
+
+        self.distance_obj_start_x = self.getDistance(self.base_position[0], self.observation[0][0])
+        self.distance_obj_start_y = self.getDistance(self.base_position[1], self.observation[0][1])
+
         eef_state = self.Xarm.getLinkPose(link_id=8)
         self.initial_eef_p3,self.initial_eef_q4 = eef_state[0],eef_state[1]
         self.Xarm.setInitPose()

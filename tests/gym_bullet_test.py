@@ -16,7 +16,7 @@ def main():
   # env = img_obs(env)
 
   SAC_result = "/Xarm_SoftBody_NoIMG_norm_rew_CNN_SAC_startnear_no_trainfreq_1300000_steps"
-  PPO_result = "/test_env_rew_change_1500000_steps"
+  PPO_result = "/test_env_rew_change_3500000_steps"
   New_start_pos = "/Xarm_SoftBody_grab_50000_steps"
 
   observation = env.reset()

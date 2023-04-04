@@ -7,6 +7,7 @@ from stable_baselines3.common.vec_env import VecNormalize, DummyVecEnv
 from stable_baselines3.common.callbacks import CheckpointCallback
 from stable_baselines3.common.monitor import Monitor
 from simple_xarm.resources.wrapper import ProcessFrame84,ImageToPyTorch
+from custom_policy import custom_policy
 
 #tensorboard --logdir ./Mlp_log/
 def main():
@@ -17,14 +18,15 @@ def main():
 
   observation = env.reset()
 
-  prefix_first = "test_env_rew_change"
+  prefix_first = "test_env_no_custom_policy"
   # prefix_cont  = prefix_first + "_500000" + "_steps"
   timestep = 2000000
 
   zip_name = "/test_env_rew_change_2000000_steps.zip"
 
-  # model = first_train(env,log_dir,prefix_first,timestep)
-  model = cont_train(env,log_dir,prefix_first,zip_name,timestep)
+
+  model = first_train(env,log_dir,prefix_first,timestep)
+  # model = cont_train(env,log_dir,prefix_first,zip_name,timestep)
 
   # model = PPO.load(log_dir + "/Xarm_checkpoint_basic_cont_300000_steps.zip")
 
@@ -39,8 +41,11 @@ def main():
   env.close()
 
 def first_train(env,log_dir,prefix,timestep):
+  policy_kwargs = dict(net_arch=[dict(pi=[64, 32, 32], vf=[64, 32, 32])])
   checkpoint_callback = CheckpointCallback(save_freq=50000, save_path=log_dir, name_prefix=prefix)
+  # model = PPO('MlpPolicy', env, policy_kwargs=policy_kwargs, verbose=1,learning_rate = 0.00025,batch_size=8,gamma=0.999,tensorboard_log=log_dir,n_steps = 1000)
   model = PPO('MlpPolicy', env, verbose=1,learning_rate = 0.00025,batch_size=8,gamma=0.999,tensorboard_log=log_dir,n_steps = 1000)
+
   # model = SAC('CnnPolicy', env, verbose=1,learning_rate = 0.00025,batch_size=8,gamma=0.999,tensorboard_log=log_dir,train_freq = 1)
   model.learn(total_timesteps=timestep,callback=[checkpoint_callback],log_interval=1)
   model.save("SAC_grab")
