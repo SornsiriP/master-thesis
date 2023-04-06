@@ -139,7 +139,7 @@ class XarmEnv(gym.Env):
         #             print("************grab**********")
         #             print("finger", dist_fing)
         
-        if len(p.getContactPoints(self.object_id,self.xarm_id)) > 2:
+        if len(p.getContactPoints(self.object_id,self.xarm_id)) > 2:    #1gripper touch is more than 2!
             reward_gripper = (1.5-dist_fing) #0=open
             if self.current_timeStep % 10 == 0:
                 if dist_fing<0.5:
