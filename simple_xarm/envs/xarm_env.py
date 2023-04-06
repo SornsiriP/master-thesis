@@ -73,7 +73,7 @@ class XarmEnv(gym.Env):
             self.done = True
             self.current_timeStep =0
             reward = 1000/4*0.8
-        elif reward < -1:     #Softbody crash #new reward dont have minus
+        elif len(p.getContactPoints(self.object_id,self.xarm_id)) > 100:     #Softbody crash #new reward dont have minus
             print("Soft body crash")
             self.done = True
             self.current_timeStep =0
@@ -138,8 +138,9 @@ class XarmEnv(gym.Env):
         #         if dist_fing<0.2:
         #             print("************grab**********")
         #             print("finger", dist_fing)
-        
-        if len(p.getContactPoints(self.object_id,self.xarm_id)) > 2:    #1gripper touch is more than 2!
+        if self.current_timeStep % 50 == 0:
+            print(len(p.getContactPoints(self.object_id,self.xarm_id)))
+        if len(p.getContactPoints(self.object_id,self.xarm_id)) > 15:    #1gripper touch is more than 2!
             reward_gripper = (1.5-dist_fing) #0=open
             if self.current_timeStep % 10 == 0:
                 if dist_fing<0.5:
