@@ -14,6 +14,8 @@ def main():
   log_dir = "./Mlp_log"
   env = XarmEnv()
   env = Monitor(env,log_dir)
+  env = DummyVecEnv([lambda: env]) 
+  env = VecNormalize(env, norm_obs=True, norm_reward=True)
   # env = img_obs(env)
 
   observation = env.reset()

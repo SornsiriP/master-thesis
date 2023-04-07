@@ -148,7 +148,7 @@ class XarmEnv(gym.Env):
             if (left_lower_bound < left_finger).all() and (left_finger< left_upper_bound).all() and (right_lower_bound < (right_finger)).all() and (right_finger < right_upper_bound).all():
                 reward_gripper = reward_gripper*2
         else: 
-            if dist_fing>.4:
+            if dist_fing>.4:   #what is dist_fing when close
                 reward_gripper = 0.1
             else:reward_gripper = 0
 
@@ -168,11 +168,14 @@ class XarmEnv(gym.Env):
         return Norm_reward
 
     def RewardNorm(self,reward):
-        # motion_range = [-0.05,0.05]
-        rew_range = [0,1]
-        # gripper_range = [0.0,0.85]
-        reward = np.interp(reward,[0,2],rew_range)
+        if reward > 0:
+            rew_range = [0,1]
+            reward = np.interp(reward,[0,3],rew_range)
+        else:
+            rew_range = [-1,0]
+            reward = np.interp(reward,[-5,0],rew_range)
         return reward
+    
 
     def getObservation(self):
         # current_pose = self.getLinkPose(self.eef_id)
