@@ -13,17 +13,17 @@ from simple_xarm.resources.wrapper import ProcessFrame84,ImageToPyTorch
 def main():
   log_dir = "./Mlp_log"
   env = XarmEnv()
-  # env = img_obs(env)
+  env = img_obs(env)
 
-  SAC_result = "/Xarm_SoftBody_NoIMG_norm_rew_CNN_SAC_startnear_no_trainfreq_1300000_steps"
-  PPO_result = "/test_env_rew_change_3500000_steps"
+  SAC_result = "/test_env_custom_policy_rew_1000000_steps"
+  PPO_result = "/test_env_delay_start_1500000_steps"
   New_start_pos = "/Xarm_SoftBody_grab_50000_steps"
 
   observation = env.reset()
   model = PPO.load(log_dir + PPO_result)
 
   while True:
-    # env.render()
+    env.render()
     action, _state = model.predict(observation)  #deterministic=true
     observation, reward, done, info = env.step(action)
 

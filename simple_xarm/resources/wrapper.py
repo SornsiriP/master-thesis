@@ -16,8 +16,10 @@ class ProcessFrame84(gym.ObservationWrapper):
 
     def process(frame):
         #print(frame.shape)
-        if frame.size == 720 * 960 * 3:
-            img = np.reshape(frame, [720, 960, 3]).astype(
+        width = 300
+        height = 300
+        if frame.size == width * height * 3:
+            img = np.reshape(frame, [width, height, 3]).astype(
                 np.float32)
         else:
             assert False, "Unknown resolution."

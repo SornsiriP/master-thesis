@@ -13,6 +13,7 @@ import numpy as np
 import random
 import pathlib
 import time
+import timeit
 from interruptingcow import timeout
 
 from simple_xarm.resources.robot.Xarm import Xarm_robot
@@ -48,6 +49,7 @@ class XarmEnv(gym.Env):
         self.Xarm = Xarm_robot(self.xarm_id)
     
     def step(self, action):
+        
         self.current_timeStep+=1
         p.configureDebugVisualizer(p.COV_ENABLE_SINGLE_STEP_RENDERING)
         action = self.mapAction(action)
@@ -57,7 +59,7 @@ class XarmEnv(gym.Env):
 
         self.start_pos = self.base_position[0] + self.base_position[1]
         
-        current_pos, current_obj,_,_,dist_fing = self.getObservation()
+        current_pos, current_obj,dist_fing = self.getObservation()
 
         reward = self.calculateReward()
        
@@ -82,7 +84,10 @@ class XarmEnv(gym.Env):
         return self.observation, reward, self.done, dict()
         
     def calculateReward(self):
-        current_pos, current_obj,left_finger,right_finger,dist_fing = self.getObservation()
+        current_pos, current_obj,dist_fing = self.getObservation()
+
+        left_finger = p.getLinkState(self.xarm_id,11)[0]
+        right_finger = p.getLinkState(self.xarm_id,14)[0]
         
         goal_z = 3
 
@@ -138,12 +143,13 @@ class XarmEnv(gym.Env):
         #         if dist_fing<0.2:
         #             print("************grab**********")
         #             print("finger", dist_fing)
-        if self.current_timeStep % 50 == 0:
-            print(len(p.getContactPoints(self.object_id,self.xarm_id)))
+        # if self.current_timeStep % 10 == 0:
+            # print(dist_fing)
+            # print(len(p.getContactPoints(self.object_id,self.plane_id)))
         if len(p.getContactPoints(self.object_id,self.xarm_id)) > 15:    #1gripper touch is more than 2!
             reward_gripper = (1.5-dist_fing) #0=open
             if self.current_timeStep % 10 == 0:
-                if dist_fing<0.5:
+                if dist_fing<0.7:
                     print("************grab**********")
             if (left_lower_bound < left_finger).all() and (left_finger< left_upper_bound).all() and (right_lower_bound < (right_finger)).all() and (right_finger < right_upper_bound).all():
                 reward_gripper = reward_gripper*2
@@ -186,10 +192,10 @@ class XarmEnv(gym.Env):
         left_finger = p.getLinkState(self.xarm_id,11)[0]
         right_finger = p.getLinkState(self.xarm_id,14)[0]
         dist_fing = np.linalg.norm(tuple(map(lambda i, j: i - j, left_finger, right_finger)))
-        return current_pos, current_obj,left_finger,right_finger, dist_fing
+        return current_pos, current_obj, dist_fing
 
     def getNewPos(self,action):
-        current_pos,_,_,_,_ = self.getObservation()
+        current_pos,_,_ = self.getObservation()
         dx,dy,dz,dgripper = action
         new_pos = [current_pos[0] + dx, current_pos[1] + dy, current_pos[2] + dz]
         return new_pos,dgripper
@@ -278,7 +284,7 @@ class XarmEnv(gym.Env):
         # #reset the env to initial state
         
 
-        p.loadURDF("plane.urdf", [0, 0, 0], useFixedBase=True)
+        self.plane_id = p.loadURDF("plane.urdf", [0, 0, 0], useFixedBase=True)
         
         #print(f"{p.getLinkState(self.xarm_id,0)}")
         # p.changeDynamics(self.object_id, -1,mass=0.1, lateralFriction=100)
@@ -290,8 +296,13 @@ class XarmEnv(gym.Env):
         # current_pos = np.array(current_pose[0])
         
         self.observation = np.concatenate((current_pose[0], 0 , self.state_object), axis=None, dtype=np.float32)
+
+        for i in range(1,150):  #wait until obj fall
+            p.stepSimulation()
         # self.observation = np.array([1]*7)
         # print("observe" ,self.observation)
+
+        
         return self.observation
     
     def random_start(self):
@@ -340,24 +351,30 @@ class XarmEnv(gym.Env):
         return id
 
     def render(self, mode='human'):
-        view_matrix = p.computeViewMatrixFromYawPitchRoll(cameraTargetPosition=[2.8,-0.1,0.2],
-                                                            distance=1.5,
+        current_pos,_,_ = self.getObservation()
+        current_pos[0] =current_pos[0]+1
+        current_pos[2] =current_pos[2]+1
+        view_matrix = p.computeViewMatrixFromYawPitchRoll(cameraTargetPosition=current_pos,
+                                                            distance=1,
                                                             yaw=90,
-                                                            pitch=-40,
+                                                            pitch=-90,
                                                             roll=0,
                                                             upAxisIndex=2)
         proj_matrix = p.computeProjectionMatrixFOV(fov=60,
-                                                     aspect=float(960) /720,
+                                                     aspect=float(300) /300,
                                                      nearVal=0.1,
                                                      farVal=100.0)
-        (_, _, px, _, _) = p.getCameraImage(width=960,
-                                              height=720,
+        
+        
+
+        (_, _, px, _, _) = p.getCameraImage(width=300,
+                                              height=300,
                                               viewMatrix=view_matrix,
                                               projectionMatrix=proj_matrix,
                                               renderer=p.ER_BULLET_HARDWARE_OPENGL)
 
         rgb_array = np.array(px, dtype=np.uint8)
-        rgb_array = np.reshape(rgb_array, (720,960, 4))
+        rgb_array = np.reshape(rgb_array, (300,300, 4))
 
         rgb_array = rgb_array[:, :, :3]
         return rgb_array
