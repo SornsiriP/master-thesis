@@ -113,7 +113,7 @@ class XarmEnv(gym.Env):
         # reward_distance_gripper_obj = (self.start_pos-((distance_obj_goal_x+distance_obj_goal_y)))/2 + (2-distance_obj_goal_z)
 
         distance_obj_goal = self.getDistance(goal_z, current_obj[2]) + 0.1
-        reward_distance_obj_goal = (goal_z-distance_obj_goal)*3
+        reward_distance_obj_goal = (goal_z-distance_obj_goal)*3 +.14 
 
         left_lower_bound = current_obj-(1,2,0.1)
         left_upper_bound = current_obj+(1,0.0,0.3)
@@ -154,12 +154,12 @@ class XarmEnv(gym.Env):
             if (left_lower_bound < left_finger).all() and (left_finger< left_upper_bound).all() and (right_lower_bound < (right_finger)).all() and (right_finger < right_upper_bound).all():
                 reward_gripper = reward_gripper*2
         else: 
-            if dist_fing>.4:   #what is dist_fing when close
+            if dist_fing>.5:   
                 reward_gripper = 0.1
             else:reward_gripper = 0
 
         penalty_time = self.current_timeStep * 0.00001        
-        reward = reward_distance_obj_goal + reward_gripper + reward_distance_gripper_obj
+        reward = reward_distance_obj_goal + reward_gripper + reward_distance_gripper_obj/5
         # reward = reward_distance_gripper_obj + reward_distance_obj_goal + reward_gripper + reward_distance_obj_original
         Norm_reward = self.RewardNorm(reward)
         if self.current_timeStep % 50 == 0:
@@ -269,7 +269,7 @@ class XarmEnv(gym.Env):
 
         
         
-        # print(base_position,"*****",base_orientation)
+        print(self.base_position,"*****",self.base_orientation)
         self.object_id = self.add_noodle(pos = self.base_position, orientation=self.base_orientation)
         
         self.observation =  self.getObservation()
@@ -306,8 +306,8 @@ class XarmEnv(gym.Env):
         return self.observation
     
     def random_start(self):
-        pos_x = np.random.uniform(2, 4)
-        pos_y = np.random.uniform(-2, 2)
+        pos_x = np.random.uniform(4, 5)
+        pos_y = np.random.uniform(-1, 1)
         pos_z = 0
         ori_x = np.random.uniform(0, .5)
         ori_y = np.random.uniform(0, .5)
@@ -352,8 +352,8 @@ class XarmEnv(gym.Env):
 
     def render(self, mode='human'):
         current_pos,_,_ = self.getObservation()
-        current_pos[0] =current_pos[0]+1
-        current_pos[2] =current_pos[2]+1
+        current_pos[0] =current_pos[0]+1.5    #x
+        current_pos[2] =current_pos[2]+2    #z
         view_matrix = p.computeViewMatrixFromYawPitchRoll(cameraTargetPosition=current_pos,
                                                             distance=1,
                                                             yaw=90,
