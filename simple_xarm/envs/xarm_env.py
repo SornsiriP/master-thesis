@@ -34,11 +34,17 @@ class XarmEnv(gym.Env):
         p.connect(p.GUI)
         p.resetDebugVisualizerCamera(cameraDistance=5, cameraYaw=60, cameraPitch=-10, cameraTargetPosition=[1,.5,1])
         self.action_space = gym.spaces.box.Box(low = np.array([-1]*4, dtype=np.float32), high = np.array([1]*4, dtype=np.float32))
-        low_bound = np.array([-1]*7, dtype=np.float32)
-        low_bound[3] = 0  #Gripper dist
-        high_bound = np.array([1]*7, dtype=np.float32)
-        high_bound[3] = 0.12 #Gripper dist
+        # low_bound = np.array([-1]*7, dtype=np.float32)
+        # low_bound[3] = 0  #Gripper dist
+        # high_bound = np.array([1]*7, dtype=np.float32)
+        # high_bound[3] = 0.12 #Gripper dist
+        # self.observation_space = gym.spaces.box.Box(low = low_bound, high = high_bound)
+
+        # self.action_space = gym.spaces.box.Box(low = np.array([-1]*4, dtype=np.float32), high = np.array([1]*4, dtype=np.float32))
+        low_bound = np.array([-10,-10,-0.5,-10,-10,-0.5,0], dtype=np.float32)  #[robotpos3+gripperpos3+gripper width]
+        high_bound = np.array([10,10,5,10,10,5,1.5], dtype=np.float32)
         self.observation_space = gym.spaces.box.Box(low = low_bound, high = high_bound)
+
         #
         #p.resetDebugVisualizerCamera(cameraDistance=1.5, cameraYaw=0, cameraPitch=-40, cameraTargetPosition=[0.55,-0.35,0.2])
         self.xarm_id = p.loadURDF(f"{self.resourcesDir}/urdf/xarm7_g/xarm7_with_gripper.urdf", [0, 0, 0.5], useFixedBase=True)
@@ -60,7 +66,6 @@ class XarmEnv(gym.Env):
         self.start_pos = self.base_position[0] + self.base_position[1]
         
         current_pos, current_obj,dist_fing = self.getObservation()
-
         reward = self.calculateReward()
        
         self.observation = np.concatenate((current_pos, dist_fing , current_obj), axis=None, dtype=np.float32)
@@ -113,7 +118,7 @@ class XarmEnv(gym.Env):
         # reward_distance_gripper_obj = (self.start_pos-((distance_obj_goal_x+distance_obj_goal_y)))/2 + (2-distance_obj_goal_z)
 
         distance_obj_goal = self.getDistance(goal_z, current_obj[2]) + 0.1
-        reward_distance_obj_goal = (goal_z-distance_obj_goal)*3 +.14 
+        reward_distance_obj_goal = (goal_z-distance_obj_goal)*3 +.14   #off set score
 
         left_lower_bound = current_obj-(1,2,0.1)
         left_upper_bound = current_obj+(1,0.0,0.3)
@@ -192,7 +197,9 @@ class XarmEnv(gym.Env):
         left_finger = p.getLinkState(self.xarm_id,11)[0]
         right_finger = p.getLinkState(self.xarm_id,14)[0]
         dist_fing = np.linalg.norm(tuple(map(lambda i, j: i - j, left_finger, right_finger)))
-        return current_pos, current_obj, dist_fing
+        # observation = [current_pos , current_obj , dist_fing]
+        observation = np.concatenate((current_pos , current_obj , [dist_fing]),axis=0)
+        return current_pos , current_obj , dist_fing
 
     def getNewPos(self,action):
         current_pos,_,_ = self.getObservation()

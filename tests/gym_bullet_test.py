@@ -16,7 +16,7 @@ def main():
   env = img_obs(env)
 
   SAC_result = "/test_env_custom_policy_rew_1000000_steps"
-  PPO_result = "/test_env_delay_start_1500000_steps"
+  PPO_result = "/test_env_CNN_100000_steps"
   New_start_pos = "/Xarm_SoftBody_grab_50000_steps"
 
   observation = env.reset()
@@ -24,7 +24,7 @@ def main():
 
   while True:
     env.render()
-    action, _state = model.predict(observation)  #deterministic=true
+    action, _state = model.predict(observation,deterministic=True)  
     observation, reward, done, info = env.step(action)
 
     if done:
