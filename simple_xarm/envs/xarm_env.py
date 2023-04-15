@@ -164,7 +164,7 @@ class XarmEnv(gym.Env):
             else:reward_gripper = 0
 
         penalty_time = self.current_timeStep * 0.00001        
-        reward = reward_distance_obj_goal + reward_gripper + reward_distance_gripper_obj/5
+        reward = reward_distance_obj_goal + reward_gripper*2 + reward_distance_gripper_obj/5
         # reward = reward_distance_gripper_obj + reward_distance_obj_goal + reward_gripper + reward_distance_obj_original
         Norm_reward = self.RewardNorm(reward)
         if self.current_timeStep % 50 == 0:
