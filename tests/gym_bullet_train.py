@@ -20,7 +20,7 @@ def main():
   # env = img_obs(env)
   observation = env.reset()
 
-  prefix_first = "test_env_Mlp_hyper_param"
+  prefix_first = "test_env_Mlp_hyper_param1"
   # prefix_cont  = prefix_first + "_500000" + "_steps"
   timestep = 2000000
 
@@ -43,7 +43,7 @@ def main():
 def first_train(env,log_dir,prefix,timestep):
   # policy_kwargs = dict(net_arch=[dict(pi=[64, 32, 32], vf=[64, 32, 32])])
   checkpoint_callback = CheckpointCallback(save_freq=50000, save_path=log_dir, name_prefix=prefix)
-  model = PPO('MlpPolicy', env, verbose=1,learning_rate = 0.0003,batch_size=16,gamma=0.999,tensorboard_log=log_dir,n_steps = 128)
+  model = PPO('MlpPolicy', env, verbose=1,learning_rate = 0.0003,ent_coef = 0.01,batch_size=16,gamma=0.999,tensorboard_log=log_dir,n_steps = 1000)
   # model = PPO('CnnPolicy', env, verbose=1,learning_rate = 0.00025,batch_size=8,gamma=0.999,tensorboard_log=log_dir,n_steps = 1000,policy_kwargs=dict(normalize_images=False))
 
   # model = SAC('CnnPolicy', env, verbose=1,learning_rate = 0.00025,batch_size=8,gamma=0.999,tensorboard_log=log_dir,train_freq = 1)
