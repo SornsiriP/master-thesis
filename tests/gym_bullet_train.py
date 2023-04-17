@@ -3,7 +3,7 @@ import torch
 from simple_xarm.envs.xarm_env import XarmEnv
 from stable_baselines3 import PPO,SAC
 from stable_baselines3.common.env_checker import check_env
-from stable_baselines3.common.vec_env import VecNormalize, DummyVecEnv
+from stable_baselines3.common.vec_env import VecNormalize, DummyVecEnv, VecEnv, SubprocVecEnv
 from stable_baselines3.common.callbacks import CheckpointCallback
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.env_util import make_vec_env
@@ -14,13 +14,15 @@ from custom_policy import custom_policy
 def main():
   log_dir = "./Mlp_log"
   env = XarmEnv()
-  # env = make_vec_env(env, n_envs=4)
+  # n_envs = 4 # Number of copies of the environment
+  # env_list = [XarmEnv() for _ in range(4)]
+  # env = SubprocVecEnv([lambda: env] * n_envs)
 
   env = Monitor(env,log_dir)
   # env = img_obs(env)
   observation = env.reset()
 
-  prefix_first = "test_env_Mlp_hyper_param1"
+  prefix_first = "test_env_simple1"
   # prefix_cont  = prefix_first + "_500000" + "_steps"
   timestep = 2000000
 
@@ -43,7 +45,7 @@ def main():
 def first_train(env,log_dir,prefix,timestep):
   # policy_kwargs = dict(net_arch=[dict(pi=[64, 32, 32], vf=[64, 32, 32])])
   checkpoint_callback = CheckpointCallback(save_freq=50000, save_path=log_dir, name_prefix=prefix)
-  model = PPO('MlpPolicy', env, verbose=1,learning_rate = 0.0003,ent_coef = 0.01,batch_size=16,gamma=0.999,tensorboard_log=log_dir,n_steps = 1000)
+  model = PPO('MlpPolicy', env, verbose=1,learning_rate = 0.0003,batch_size=16,gamma=0.999,tensorboard_log=log_dir,n_steps = 1000)
   # model = PPO('CnnPolicy', env, verbose=1,learning_rate = 0.00025,batch_size=8,gamma=0.999,tensorboard_log=log_dir,n_steps = 1000,policy_kwargs=dict(normalize_images=False))
 
   # model = SAC('CnnPolicy', env, verbose=1,learning_rate = 0.00025,batch_size=8,gamma=0.999,tensorboard_log=log_dir,train_freq = 1)

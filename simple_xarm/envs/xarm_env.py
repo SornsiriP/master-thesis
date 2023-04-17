@@ -32,7 +32,7 @@ class XarmEnv(gym.Env):
         workDir = pathlib.Path(__file__).parent.resolve()
         self.resourcesDir = os.path.join(workDir, "../resources") 
         p.connect(p.GUI)
-        p.resetDebugVisualizerCamera(cameraDistance=5, cameraYaw=60, cameraPitch=-10, cameraTargetPosition=[1,.5,1])
+        p.resetDebugVisualizerCamera(cameraDistance=8, cameraYaw=60, cameraPitch=-10, cameraTargetPosition=[5,-1,3])
         self.action_space = gym.spaces.box.Box(low = np.array([-1]*4, dtype=np.float32), high = np.array([1]*4, dtype=np.float32))
         # low_bound = np.array([-1]*7, dtype=np.float32)
         # low_bound[3] = 0  #Gripper dist
@@ -91,6 +91,8 @@ class XarmEnv(gym.Env):
     def calculateReward(self):
         current_pos, current_obj,dist_fing = self.getObservation()
 
+        obj_height = self.objMaxHeight()
+
         left_finger = p.getLinkState(self.xarm_id,11)[0]
         right_finger = p.getLinkState(self.xarm_id,14)[0]
         
@@ -110,6 +112,8 @@ class XarmEnv(gym.Env):
         perc_dist_x = 100 - distance_obj_goal_x*100/self.distance_obj_start_x
         perc_dist_y = 100 - distance_obj_goal_y*100/self.distance_obj_start_y
         reward_distance_gripper_obj = (perc_dist_x + perc_dist_y) / 2 * .01   #max = .5
+        if reward_distance_gripper_obj < 0:
+            reward_distance_gripper_obj = -0.1
 
         # if self.current_timeStep % 10 == 0:
         #     print(distance_obj_goal_x,distance_obj_goal_y)
@@ -164,7 +168,8 @@ class XarmEnv(gym.Env):
             else:reward_gripper = 0
 
         penalty_time = self.current_timeStep * 0.00001        
-        reward = reward_distance_obj_goal + reward_gripper*2 + reward_distance_gripper_obj/5
+        # reward = reward_distance_obj_goal + reward_gripper*2 + reward_distance_gripper_obj/5
+        reward = reward_distance_gripper_obj
         # reward = reward_distance_gripper_obj + reward_distance_obj_goal + reward_gripper + reward_distance_obj_original
         Norm_reward = self.RewardNorm(reward)
         if self.current_timeStep % 50 == 0:
@@ -210,17 +215,22 @@ class XarmEnv(gym.Env):
     def getDistance(self, a, b):
         return abs(a-b)
     
+    def objMaxHeight(self):
+        nodes_info = p.getMeshData(self.object_id)[1]
+        max_position = np.max(nodes_info,axis=0)
+        obj_height = max_position[2]
+        return obj_height
+    
     def mapAction(self,action):
         # motion_range = [-0.05,0.05]
         motion_range = [-1,1]
         gripper_range = [0.0,0.9]
-        action[0] = np.interp(action[0],[-1,1],motion_range)
-        action[1] = np.interp(action[1],[-1,1],motion_range)
-        action[2] = np.interp(action[2],[-1,1],motion_range)
+        action[0] = np.interp(action[0],[-0.5,0.5],motion_range)
+        action[1] = np.interp(action[1],[-0.5,0.5],motion_range)
+        action[2] = np.interp(action[2],[-0.5,0.5],motion_range)
         if action[3]<0:
             action[3] = 0
         else: action[3] = 1
-
         # action[3] = np.interp(action[3],[-1,1],gripper_range)
         return action
 
