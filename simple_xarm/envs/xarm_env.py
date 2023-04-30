@@ -111,7 +111,7 @@ class XarmEnv(gym.Env):
         # perc_dist_y =(self.distance_obj_start_y-distance_obj_goal_y)*100/self.distance_obj_start_y
         perc_dist_x = 100 - distance_obj_goal_x*100/self.distance_obj_start_x
         perc_dist_y = 100 - distance_obj_goal_y*100/self.distance_obj_start_y
-        reward_distance_gripper_obj = (perc_dist_x + perc_dist_y) / 2 * .01   #max = .5
+        reward_distance_gripper_obj = (perc_dist_x + perc_dist_y) / 2 * .01 + (1 - distance_obj_goal_z)*.5  #max = .5
         if reward_distance_gripper_obj < 0:
             reward_distance_gripper_obj = -0.1
 
@@ -172,7 +172,7 @@ class XarmEnv(gym.Env):
         reward = reward_distance_gripper_obj
         # reward = reward_distance_gripper_obj + reward_distance_obj_goal + reward_gripper + reward_distance_obj_original
         Norm_reward = self.RewardNorm(reward)
-        if self.current_timeStep % 50 == 0:
+        if self.current_timeStep % 30 == 0:
             # print(current_obj[2])
             print("reward_distance_gripper_obj",reward_distance_gripper_obj)
             print("reward_distance_obj_goal ",reward_distance_obj_goal)
@@ -323,8 +323,8 @@ class XarmEnv(gym.Env):
         return self.observation
     
     def random_start(self):
-        pos_x = np.random.uniform(4, 5)
-        pos_y = np.random.uniform(-1, 1)
+        pos_x = np.random.uniform(4, 4.5)
+        pos_y = np.random.uniform(-.5, .5)
         pos_z = 0
         ori_x = np.random.uniform(0, .5)
         ori_y = np.random.uniform(0, .5)

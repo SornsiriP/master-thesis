@@ -25,9 +25,11 @@ for _ in range(5000):
   pre_pick_pos = [obj_pos[0]+pre_pick_offset[0],obj_pos[1]+pre_pick_offset[1],obj_pos[2]+pre_pick_offset[2]]
   # pick_pos = [obj_pos[0],obj_pos[1],obj_pos[2]-0.07]
   pick_pos = [obj_pos[0],obj_pos[1],obj_pos[2]-.6]
-  highest = [obj_pos[0],obj_pos[1],obj_pos[2]+pre_pick_offset[2]+0.5]
-
-  # env.setPose(pre_pick_pos,env.initial_eef_q4,grip_width=0,wait_finish=True) #open
+  highest = [obj_pos[0],obj_pos[1],obj_pos[2]+pre_pick_offset[2]+1]
+  array_2d = p.getMeshData(env.object_id)[1]
+  # print("Mesh data"   , p.getMeshData(env.object_id)[1])
+  print("Max in array",np.max(array_2d,axis=0))
+  env.setPose(pre_pick_pos,env.initial_eef_q4,grip_width=0,wait_finish=True) #open
 
   # print("open")
   # env.setPose(pick_pos,env.initial_eef_q4,grip_width=0,wait_finish=True) #open
@@ -36,15 +38,15 @@ for _ in range(5000):
   # print("half")
   # env.setPose(pick_pos,env.initial_eef_q4,grip_width=0.5,wait_finish=True) #half
   
-  # print("2")
-  # env.setPose(pick_pos,env.initial_eef_q4,grip_width=0.,wait_finish=True)
-  # # env.remove_anchor()
-  # print("3")
-  # # print("Get joint",env.getJointStates())
-  # env.setPose(pick_pos,env.initial_eef_q4,grip_width=0.9,wait_finish=True)
-  # print("4")
-  # env.setPose(pre_pick_pos,env.initial_eef_q4,grip_width=0.85,wait_finish=True)
-  # env.setPose(highest,env.initial_eef_q4,grip_width=0.85,wait_finish=True)
+  print("2")
+  env.setPose(pick_pos,env.initial_eef_q4,grip_width=0.,wait_finish=True)
+  # env.remove_anchor()
+  print("3")
+  # print("Get joint",env.getJointStates())
+  env.setPose(pick_pos,env.initial_eef_q4,grip_width=0.9,wait_finish=True)
+  print("4")
+  env.setPose(pre_pick_pos,env.initial_eef_q4,grip_width=0.85,wait_finish=True)
+  env.setPose(highest,env.initial_eef_q4,grip_width=0.85,wait_finish=True)
   
   env.step()
   
