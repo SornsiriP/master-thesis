@@ -31,7 +31,8 @@ class XarmEnv(gym.Env):
         self.step_counter = 0
         workDir = pathlib.Path(__file__).parent.resolve()
         self.resourcesDir = os.path.join(workDir, "../resources") 
-        p.connect(p.GUI)
+        # p.connect(p.DIRECT)   #not render
+        p.connect(p.GUI)   #render
         p.resetDebugVisualizerCamera(cameraDistance=8, cameraYaw=60, cameraPitch=-10, cameraTargetPosition=[5,-1,3])
         self.action_space = gym.spaces.box.Box(low = np.array([-1]*4, dtype=np.float32), high = np.array([1]*4, dtype=np.float32))
         # low_bound = np.array([-1]*7, dtype=np.float32)
@@ -121,8 +122,8 @@ class XarmEnv(gym.Env):
         #     print("percent",perc_dist_x,perc_dist_y)
         # reward_distance_gripper_obj = (self.start_pos-((distance_obj_goal_x+distance_obj_goal_y)))/2 + (2-distance_obj_goal_z)
 
-        distance_obj_goal = self.getDistance(goal_z, current_obj[2]) + 0.1
-        reward_distance_obj_goal = (goal_z-distance_obj_goal)*3 +.14   #off set score
+        distance_obj_goal = self.getDistance(goal_z, obj_height) + 0.1
+        reward_distance_obj_goal = (goal_z-distance_obj_goal)*3    #off set score
 
         left_lower_bound = current_obj-(1,2,0.1)
         left_upper_bound = current_obj+(1,0.0,0.3)
@@ -169,9 +170,11 @@ class XarmEnv(gym.Env):
 
         penalty_time = self.current_timeStep * 0.00001        
         # reward = reward_distance_obj_goal + reward_gripper*2 + reward_distance_gripper_obj/5
-        reward = reward_distance_gripper_obj
+        reward = reward_distance_gripper_obj + reward_gripper*2
         # reward = reward_distance_gripper_obj + reward_distance_obj_goal + reward_gripper + reward_distance_obj_original
-        Norm_reward = self.RewardNorm(reward)
+        Norm_reward = self.RewardNorm(reward) + reward_distance_obj_goal
+
+
         if self.current_timeStep % 30 == 0:
             # print(current_obj[2])
             print("reward_distance_gripper_obj",reward_distance_gripper_obj)
@@ -223,7 +226,7 @@ class XarmEnv(gym.Env):
     
     def mapAction(self,action):
         # motion_range = [-0.05,0.05]
-        motion_range = [-1,1]
+        motion_range = [-1.5,1.5]
         gripper_range = [0.0,0.9]
         action[0] = np.interp(action[0],[-0.5,0.5],motion_range)
         action[1] = np.interp(action[1],[-0.5,0.5],motion_range)
@@ -232,6 +235,7 @@ class XarmEnv(gym.Env):
             action[3] = 0
         else: action[3] = 1
         # action[3] = np.interp(action[3],[-1,1],gripper_range)
+        # print("action",action)
         return action
 
     def setJoints(self,joint_goal,wait_finish=False):
@@ -282,9 +286,7 @@ class XarmEnv(gym.Env):
         # self.object_id = p.loadURDF("cube.urdf", basePosition = self.state_object,globalScaling=0.05)
         # self.object_id = p.loadSoftBody("tube.vtk", simFileName = "tube.vtk", basePosition = [2.5,-0.1,0.13],baseOrientation = [0,0,1,1], scale =0.5, mass = 1, 
         # useBendingSprings = 1,springBendingStiffness = 1, useNeoHookean = 1, NeoHookeanMu = 500, NeoHookeanLambda = 1000, NeoHookeanDamping = 0.002, useSelfCollision = 1, frictionCoeff = 3, collisionMargin = 0.001)
-        self.base_position, self.base_orientation = self.random_start() 
-
-        
+        self.base_position, self.base_orientation = self.random_start()
         
         print(self.base_position,"*****",self.base_orientation)
         self.object_id = self.add_noodle(pos = self.base_position, orientation=self.base_orientation)
@@ -296,7 +298,7 @@ class XarmEnv(gym.Env):
 
         eef_state = self.Xarm.getLinkPose(link_id=8)
         self.initial_eef_p3,self.initial_eef_q4 = eef_state[0],eef_state[1]
-        self.Xarm.setInitPose()
+        
         # self.Xarm.reset()
         # #reset the env to initial state
         
@@ -312,10 +314,13 @@ class XarmEnv(gym.Env):
         current_pose = self.Xarm.getLinkPose(self.eef_id)
         # current_pos = np.array(current_pose[0])
         
-        self.observation = np.concatenate((current_pose[0], 0 , self.state_object), axis=None, dtype=np.float32)
+        self.observation = np.concatenate((current_pose[0], 0 , self.base_position), axis=None, dtype=np.float32)
 
         for i in range(1,150):  #wait until obj fall
             p.stepSimulation()
+
+        
+        self.Xarm.setInitPose()
         # self.observation = np.array([1]*7)
         # print("observe" ,self.observation)
 
@@ -323,15 +328,17 @@ class XarmEnv(gym.Env):
         return self.observation
     
     def random_start(self):
-        pos_x = np.random.uniform(4, 4.5)
+        pos_x = np.random.uniform(3, 4)
         pos_y = np.random.uniform(-.5, .5)
         pos_z = 0
-        ori_x = np.random.uniform(0, .5)
-        ori_y = np.random.uniform(0, .5)
+        ori_x = np.random.uniform(0.2, .5)
+        ori_y = np.random.uniform(0.2, .5)
         ori_z = np.random.uniform(0, .1)
         ori_w = np.random.uniform(0, .1)
-        position = [pos_x,pos_y,pos_z]
-        orientation = [ori_x,ori_y,ori_z,ori_w]
+        # position = [pos_x,pos_y,pos_z]
+        # orientation = [ori_x,ori_y,ori_z,ori_w]
+        position = [3,0,0]
+        orientation = [0.2,0.2,0,0]
         return position,orientation
 
     def add_noodle(self, pos, orientation):
@@ -369,10 +376,10 @@ class XarmEnv(gym.Env):
 
     def render(self, mode='human'):
         current_pos,_,_ = self.getObservation()
-        current_pos[0] =current_pos[0]+1.5    #x
+        current_pos[0] =current_pos[0]+2    #x
         current_pos[2] =current_pos[2]+2    #z
         view_matrix = p.computeViewMatrixFromYawPitchRoll(cameraTargetPosition=current_pos,
-                                                            distance=1,
+                                                            distance=2,
                                                             yaw=90,
                                                             pitch=-90,
                                                             roll=0,

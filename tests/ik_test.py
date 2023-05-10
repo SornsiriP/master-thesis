@@ -4,10 +4,30 @@ from simple_xarm.envs.xarm_ik_env import XarmIK
 import pybullet as p
 import numpy as np
 import time
+import csv
 # from simple_xarm.envs.xarm_env import XarmEnv
 
 env = XarmIK()
 observation = env.reset()
+
+def write_deform_csv():
+  array_2d = p.getMeshData(env.object_id)[1]
+  with open('deformation.csv', 'w') as f:
+    # create the csv writer
+    writer = csv.writer(f)
+
+    writer.writerows(array_2d)
+    print("*****Writing deform to csv******")
+    # f.close()
+
+def write_original_csv():
+  array_2d = p.getMeshData(env.object_id)[1]
+  with open('original.csv', 'w') as f:
+    # create the csv writer
+    writer = csv.writer(f)
+
+    writer.writerows(array_2d)
+    print("*****Writing original to csv******")
 
 
 for _ in range(5000):
@@ -24,11 +44,11 @@ for _ in range(5000):
   pre_pick_offset = [0,0,.3]
   pre_pick_pos = [obj_pos[0]+pre_pick_offset[0],obj_pos[1]+pre_pick_offset[1],obj_pos[2]+pre_pick_offset[2]]
   # pick_pos = [obj_pos[0],obj_pos[1],obj_pos[2]-0.07]
-  pick_pos = [obj_pos[0],obj_pos[1],obj_pos[2]-.6]
+  pick_pos = [obj_pos[0],obj_pos[1],obj_pos[2]-.59]
   highest = [obj_pos[0],obj_pos[1],obj_pos[2]+pre_pick_offset[2]+1]
-  array_2d = p.getMeshData(env.object_id)[1]
+  # array_2d = p.getMeshData(env.object_id)[1]
   # print("Mesh data"   , p.getMeshData(env.object_id)[1])
-  print("Max in array",np.max(array_2d,axis=0))
+  # print("Max in array",np.max(array_2d,axis=0))
   env.setPose(pre_pick_pos,env.initial_eef_q4,grip_width=0,wait_finish=True) #open
 
   # print("open")
@@ -39,6 +59,7 @@ for _ in range(5000):
   # env.setPose(pick_pos,env.initial_eef_q4,grip_width=0.5,wait_finish=True) #half
   
   print("2")
+  write_original_csv()
   env.setPose(pick_pos,env.initial_eef_q4,grip_width=0.,wait_finish=True)
   # env.remove_anchor()
   print("3")
@@ -48,6 +69,9 @@ for _ in range(5000):
   env.setPose(pre_pick_pos,env.initial_eef_q4,grip_width=0.85,wait_finish=True)
   env.setPose(highest,env.initial_eef_q4,grip_width=0.85,wait_finish=True)
   
-  env.step()
+  for _ in range(300):
+    env.step()
   
+  # write_deform_csv()
+
 env.close()
