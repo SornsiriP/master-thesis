@@ -110,9 +110,11 @@ class XarmEnv(gym.Env):
         
         # perc_dist_x = (self.distance_obj_start_x-distance_obj_goal_x)*100/self.distance_obj_start_x
         # perc_dist_y =(self.distance_obj_start_y-distance_obj_goal_y)*100/self.distance_obj_start_y
-        perc_dist_x = 100 - distance_obj_goal_x*100/self.distance_obj_start_x
+        perc_dist_x = 100 - distance_obj_goal_x*100 /self.distance_obj_start_x  
         perc_dist_y = 100 - distance_obj_goal_y*100/self.distance_obj_start_y
-        reward_distance_gripper_obj = (perc_dist_x + perc_dist_y) / 2 * .01 + (1 - distance_obj_goal_z)*.5  #max = .5
+        # reward_distance_gripper_obj = (perc_dist_x + perc_dist_y) / 2 * .01 + (1 - distance_obj_goal_z)*.5  #max = .5
+        reward_distance_gripper_obj = (self.base_position[0]-distance_obj_goal_x-1)-(distance_obj_goal_y/3)
+        
         if reward_distance_gripper_obj < 0:
             reward_distance_gripper_obj = -0.1
 
@@ -156,7 +158,7 @@ class XarmEnv(gym.Env):
         # if self.current_timeStep % 10 == 0:
             # print(dist_fing)
             # print(len(p.getContactPoints(self.object_id,self.plane_id)))
-        if len(p.getContactPoints(self.object_id,self.xarm_id)) > 15:    #1gripper touch is more than 2!
+        if len(p.getContactPoints(self.object_id,self.xarm_id)) > 20:    #1gripper touch is more than 2!
             reward_gripper = (1.5-dist_fing) #0=open
             if self.current_timeStep % 10 == 0:
                 if dist_fing<0.7:
@@ -164,7 +166,7 @@ class XarmEnv(gym.Env):
             if (left_lower_bound < left_finger).all() and (left_finger< left_upper_bound).all() and (right_lower_bound < (right_finger)).all() and (right_finger < right_upper_bound).all():
                 reward_gripper = reward_gripper*2
         else: 
-            if dist_fing>.5:   
+            if dist_fing>.6:   
                 reward_gripper = 0.1
             else:reward_gripper = 0
 
@@ -177,6 +179,8 @@ class XarmEnv(gym.Env):
 
         if self.current_timeStep % 30 == 0:
             # print(current_obj[2])
+            print(current_pos)
+            print(self.base_position[1]-current_pos[1],'**********', perc_dist_y)
             print("reward_distance_gripper_obj",reward_distance_gripper_obj)
             print("reward_distance_obj_goal ",reward_distance_obj_goal)
             print("reward_gripper",reward_gripper)
@@ -316,9 +320,9 @@ class XarmEnv(gym.Env):
         
         self.observation = np.concatenate((current_pose[0], 0 , self.base_position), axis=None, dtype=np.float32)
 
-        for i in range(1,150):  #wait until obj fall
+        for i in range(1,100):  #wait until obj fall
             p.stepSimulation()
-
+        self.current_timeStep=0
         
         self.Xarm.setInitPose()
         # self.observation = np.array([1]*7)
@@ -328,17 +332,19 @@ class XarmEnv(gym.Env):
         return self.observation
     
     def random_start(self):
-        pos_x = np.random.uniform(3, 4)
-        pos_y = np.random.uniform(-.5, .5)
+        pos_x = np.random.uniform(2.5, 4)
+        pos_y = np.random.uniform(-2, 2)
         pos_z = 0
         ori_x = np.random.uniform(0.2, .5)
         ori_y = np.random.uniform(0.2, .5)
         ori_z = np.random.uniform(0, .1)
         ori_w = np.random.uniform(0, .1)
-        # position = [pos_x,pos_y,pos_z]
+        position = [pos_x,pos_y,pos_z]
         # orientation = [ori_x,ori_y,ori_z,ori_w]
-        position = [3,0,0]
-        orientation = [0.2,0.2,0,0]
+        # position = [2.5,0,0]
+        orientation = [0.22,0.2,0,0]
+        # position = [3,0,0]
+        # orientation = [0.2,0.2,0,0]
         return position,orientation
 
     def add_noodle(self, pos, orientation):
@@ -364,7 +370,7 @@ class XarmEnv(gym.Env):
             # springElasticStiffness=0.1,
             # springDampingStiffness=1000,
             # springDampingAllDirections=0,
-            frictionCoeff=5,
+            frictionCoeff=3,
             # useFaceContact=True,
             useSelfCollision = 1,
             # repulsionStiffness=500
@@ -395,7 +401,9 @@ class XarmEnv(gym.Env):
                                               height=300,
                                               viewMatrix=view_matrix,
                                               projectionMatrix=proj_matrix,
-                                              renderer=p.ER_BULLET_HARDWARE_OPENGL)
+                                              renderer=p.ER_BULLET_HARDWARE_OPENGL,
+                                            #   flags = p.ER_SEGMENTATION_MASK_OBJECT_AND_LINKINDEX
+                                            )
 
         rgb_array = np.array(px, dtype=np.uint8)
         rgb_array = np.reshape(rgb_array, (300,300, 4))

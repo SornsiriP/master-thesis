@@ -13,10 +13,10 @@ from simple_xarm.resources.wrapper import ProcessFrame84,ImageToPyTorch
 def main():
   log_dir = "./Mlp_log"
   env = XarmEnv()
-  env = img_obs(env)
+  # env = img_obs(env)
 
   SAC_result = "/test_env_custom_policy_rew_1000000_steps"
-  PPO_result = "/test_env_simple7_500000_steps"
+  PPO_result = "/test_env_simple8_no_img_700000_steps"
   New_start_pos = "/Xarm_SoftBody_grab_50000_steps"
 
   observation = env.reset()
