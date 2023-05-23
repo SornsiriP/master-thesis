@@ -23,18 +23,18 @@ def main():
   # env = make_vec_env(XarmEnv,n_envs=2)
 
   env = Monitor(env,log_dir)
-  # env = img_obs(env)
+  env = img_obs(env)
 
-  prefix_first = "test_env_simple11_no_img"
+  prefix_first = "PPO_img_random_start"
   prefix_cont  = prefix_first + "_grab"
   timestep = 2000000
 
   zip_name = "/test_env_simple11_no_img_550000_steps.zip"
 
 
-  # model = first_train(env,log_dir,prefix_first,timestep)
+  model = first_train(env,log_dir,prefix_first,timestep)
   # model = cont_train(env,log_dir,prefix_first,zip_name,timestep)
-  model = cont_train_no_reset_timestep(env,log_dir,prefix_cont,zip_name,timestep)
+  # model = cont_train_no_reset_timestep(env,log_dir,prefix_cont,zip_name,timestep)
 
   #while True:
   for _ in range(30000):

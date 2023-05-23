@@ -9,10 +9,10 @@ class ProcessFrame84(gym.ObservationWrapper):
     def __init__(self, env=None):
         super(ProcessFrame84, self).__init__(env)
         self.env = env
+        # self.observation_space = gym.spaces.Box(
+            # low=0, high=255, shape=(3, 84, 84), dtype=np.uint8)
         self.observation_space = gym.spaces.Box(
-            low=0, high=255, shape=(3, 84, 84), dtype=np.uint8)
-        self.observation_space = gym.spaces.Box(
-            low=0, high=255, shape=(84, 84), dtype=np.uint8)
+            low=0, high=1, shape=(84, 84), dtype=np.uint8)
 
     def observation(self, obs):
         return ProcessFrame84.process(self.env.render(mode='rgb_array'))
