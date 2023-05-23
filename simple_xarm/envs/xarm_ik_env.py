@@ -202,13 +202,13 @@ class XarmIK(gym.Env):
             useNeoHookean=1,
             # NeoHookeanMu = 1100, 
             # NeoHookeanLambda = 900,
-            NeoHookeanMu = 20000,         #stiffness/elastic modulus/shear deformation  /the more it resists shear deformation
-            NeoHookeanLambda = 15000,     #High: make shape more stable (compressibility)/volumetric deformation.
+            NeoHookeanMu = 2000,         #stiffness/elastic modulus/shear deformation  /the more it resists shear deformation
+            NeoHookeanLambda = 1500,     #High: make shape more stable (compressibility)/volumetric deformation.
             NeoHookeanDamping = 0.1,
             # springElasticStiffness=0.1,
             # springDampingStiffness=1000,
             # springDampingAllDirections=0,
-            frictionCoeff=1,
+            frictionCoeff=2,
             # useFaceContact=True,
             useSelfCollision = 1,
             # repulsionStiffness=500

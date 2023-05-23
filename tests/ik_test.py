@@ -59,7 +59,7 @@ for _ in range(5000):
   # env.setPose(pick_pos,env.initial_eef_q4,grip_width=0.5,wait_finish=True) #half
   
   print("2")
-  write_original_csv()
+  # write_original_csv()
   env.setPose(pick_pos,env.initial_eef_q4,grip_width=0.,wait_finish=True)
   # env.remove_anchor()
   print("3")

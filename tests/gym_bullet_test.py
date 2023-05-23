@@ -7,6 +7,8 @@ from stable_baselines3.common.vec_env import VecNormalize, DummyVecEnv
 from stable_baselines3.common.callbacks import CheckpointCallback
 from stable_baselines3.common.monitor import Monitor
 from simple_xarm.resources.wrapper import ProcessFrame84,ImageToPyTorch
+from stable_baselines3.common.evaluation import evaluate_policy
+import pybullet as pb
 
 # from simple_xarm.resources.wrapper import ProcessFrame84,ImageToPyTorch
 #tensorboard --logdir ./Mlp_log/
@@ -16,7 +18,7 @@ def main():
   # env = img_obs(env)
 
   SAC_result = "/test_env_custom_policy_rew_1000000_steps"
-  PPO_result = "/test_env_simple8_no_img_700000_steps"
+  PPO_result = "/test_env_simple11_no_img_grab_550000_steps"
   New_start_pos = "/Xarm_SoftBody_grab_50000_steps"
 
   observation = env.reset()
@@ -29,6 +31,14 @@ def main():
 
     if done:
       observation = env.reset()
+      # mean_reward, std_reward = evaluate_policy(model, model.get_env(), n_eval_episodes=1)
+      # print("mean_reward ", mean_reward)
+    events = pb.getKeyboardEvents()
+
+    rKey = ord('r')
+    # print(events)
+    if rKey in events and events[rKey] & pb.KEY_IS_DOWN:
+      env.reset()  
   env.close()
 
 def img_obs(env):

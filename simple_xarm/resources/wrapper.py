@@ -38,7 +38,7 @@ class ProcessFrame84(gym.ObservationWrapper):
         # cv2.imshow("camera",np.array(resized_screen, dtype = np.uint8 ))
         # cv2.waitKey(1)
 
-        for i in range(thresh.shape[0]):
+        for i in range(thresh.shape[0]):    #convert to binary image
             for j in range(thresh.shape[1]):
                 if thresh[i][j]>0.59:
                     thresh[i][j] = 1

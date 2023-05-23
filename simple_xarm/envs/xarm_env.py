@@ -71,11 +71,11 @@ class XarmEnv(gym.Env):
        
         self.observation = np.concatenate((current_pos, dist_fing , current_obj), axis=None, dtype=np.float32)
 
-        if self.current_timeStep > 1000:
-            print("step     1000")
+        if self.current_timeStep > 500:
+            print("step     500")
             self.done = True
             self.current_timeStep =0
-            reward = -100/4*0.6
+            reward = -100/4*0.6 /2
         elif current_obj[2] > 3: 
             print(" object z > 3", current_obj[2])
             self.done = True
@@ -97,7 +97,7 @@ class XarmEnv(gym.Env):
         left_finger = p.getLinkState(self.xarm_id,11)[0]
         right_finger = p.getLinkState(self.xarm_id,14)[0]
         
-        goal_z = 3
+        goal_z = 2
 
         distance_obj_ori_x = self.getDistance(current_obj[0],self.state_object[0])
         distance_obj_ori_y = self.getDistance(current_obj[1],self.state_object[1])
@@ -112,8 +112,11 @@ class XarmEnv(gym.Env):
         # perc_dist_y =(self.distance_obj_start_y-distance_obj_goal_y)*100/self.distance_obj_start_y
         perc_dist_x = 100 - distance_obj_goal_x*100 /self.distance_obj_start_x  
         perc_dist_y = 100 - distance_obj_goal_y*100/self.distance_obj_start_y
-        # reward_distance_gripper_obj = (perc_dist_x + perc_dist_y) / 2 * .01 + (1 - distance_obj_goal_z)*.5  #max = .5
-        reward_distance_gripper_obj = (self.base_position[0]-distance_obj_goal_x-1)-(distance_obj_goal_y/3)
+        perc_dist_x = perc_dist_x if perc_dist_x > 0 else -10
+        perc_dist_y = perc_dist_y if perc_dist_y > 0 else -10
+        rew_z = -.2 if perc_dist_x < 30 or distance_obj_goal_y >.2 else (1 - distance_obj_goal_z) *.5
+        reward_distance_gripper_obj = (perc_dist_x/2 + perc_dist_y) / 2 * .01 + rew_z #max = .5
+        # reward_distance_gripper_obj = (self.base_position[0]-distance_obj_goal_x-1)-(distance_obj_goal_y/3)
         
         if reward_distance_gripper_obj < 0:
             reward_distance_gripper_obj = -0.1
@@ -158,15 +161,16 @@ class XarmEnv(gym.Env):
         # if self.current_timeStep % 10 == 0:
             # print(dist_fing)
             # print(len(p.getContactPoints(self.object_id,self.plane_id)))
-        if len(p.getContactPoints(self.object_id,self.xarm_id)) > 20:    #1gripper touch is more than 2!
+        if len(p.getContactPoints(self.object_id,self.xarm_id)) >= 17 and dist_fing < .6:    #1gripper touch is more than 2!
             reward_gripper = (1.5-dist_fing) #0=open
-            if self.current_timeStep % 10 == 0:
+            if self.current_timeStep % 30 == 0:
                 if dist_fing<0.7:
                     print("************grab**********")
             if (left_lower_bound < left_finger).all() and (left_finger< left_upper_bound).all() and (right_lower_bound < (right_finger)).all() and (right_finger < right_upper_bound).all():
                 reward_gripper = reward_gripper*2
         else: 
-            if dist_fing>.6:   
+            if (current_pos[2]>0.1 and dist_fing>.7) or (current_pos[2]<0.1 and dist_fing<.8):   
+            # if dist_fing>.7:
                 reward_gripper = 0.1
             else:reward_gripper = 0
 
@@ -179,8 +183,9 @@ class XarmEnv(gym.Env):
 
         if self.current_timeStep % 30 == 0:
             # print(current_obj[2])
-            print(current_pos)
-            print(self.base_position[1]-current_pos[1],'**********', perc_dist_y)
+            print(perc_dist_x, perc_dist_y, rew_z)
+            print(current_pos[2],dist_fing)
+            print(len(p.getContactPoints(self.object_id,self.xarm_id)))
             print("reward_distance_gripper_obj",reward_distance_gripper_obj)
             print("reward_distance_obj_goal ",reward_distance_obj_goal)
             print("reward_gripper",reward_gripper)
@@ -332,7 +337,7 @@ class XarmEnv(gym.Env):
         return self.observation
     
     def random_start(self):
-        pos_x = np.random.uniform(2.5, 4)
+        pos_x = np.random.uniform(2, 3)
         pos_y = np.random.uniform(-2, 2)
         pos_z = 0
         ori_x = np.random.uniform(0.2, .5)
@@ -370,7 +375,7 @@ class XarmEnv(gym.Env):
             # springElasticStiffness=0.1,
             # springDampingStiffness=1000,
             # springDampingAllDirections=0,
-            frictionCoeff=3,
+            frictionCoeff=1,
             # useFaceContact=True,
             useSelfCollision = 1,
             # repulsionStiffness=500
