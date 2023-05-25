@@ -23,17 +23,17 @@ def main():
   # env = make_vec_env(XarmEnv,n_envs=2)
 
   env = Monitor(env,log_dir)
-  env = img_obs(env)
+  # env = img_obs(env)
 
-  prefix_first = "PPO_img_random_start"
+  prefix_first = "PPO_normal_random_start_tanh"
   prefix_cont  = prefix_first + "_grab"
   timestep = 2000000
 
-  zip_name = "/test_env_simple11_no_img_550000_steps.zip"
+  zip_name = "/PPO_normal_random_start_tanh_700000_steps.zip"
 
 
-  model = first_train(env,log_dir,prefix_first,timestep)
-  # model = cont_train(env,log_dir,prefix_first,zip_name,timestep)
+  # model = first_train(env,log_dir,prefix_first,timestep)
+  model = cont_train(env,log_dir,prefix_first,zip_name,timestep)
   # model = cont_train_no_reset_timestep(env,log_dir,prefix_cont,zip_name,timestep)
 
   #while True:
@@ -47,7 +47,7 @@ def main():
   env.close()
 
 def first_train(env,log_dir,prefix,timestep): 
-  policy_kwargs = dict(activation_fn=th.nn.LeakyReLU, net_arch=[512, 512])   #policy_kwargs=policy_kwargs, 
+  policy_kwargs = dict(activation_fn=th.nn.Tanh, net_arch=[512, 512])   #policy_kwargs=policy_kwargs, 
   checkpoint_callback = CheckpointCallback(save_freq=50000, save_path=log_dir, name_prefix=prefix)
   model = PPO('MlpPolicy', env, verbose=1,learning_rate = 0.0001,batch_size=10,gamma=0.995,tensorboard_log=log_dir,n_steps = 500,policy_kwargs=policy_kwargs)
   # model = PPO('CnnPolicy', env, verbose=1,learning_rate = 0.00025,batch_size=8,gamma=0.999,tensorboard_log=log_dir,n_steps = 1000,policy_kwargs=dict(normalize_images=False))

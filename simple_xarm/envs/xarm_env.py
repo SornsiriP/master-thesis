@@ -172,7 +172,7 @@ class XarmEnv(gym.Env):
             if (current_pos[2]>0.1 and dist_fing>.7) or (current_pos[2]<0.1 and dist_fing<.8):   
             # if dist_fing>.7:
                 reward_gripper = 0.1
-            else:reward_gripper = -.1
+            else:reward_gripper = 0
 
         penalty_time = self.current_timeStep * 0.00001        
         # reward = reward_distance_obj_goal + reward_gripper*2 + reward_distance_gripper_obj/5
