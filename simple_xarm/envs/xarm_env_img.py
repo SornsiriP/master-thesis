@@ -4,7 +4,7 @@ import gym
 from gym import error, spaces, utils
 from gym.utils import seeding
 
-
+import cv2 
 import os
 import pybullet as p
 import pybullet_data
@@ -24,7 +24,7 @@ from simple_xarm.resources.robot.Xarm import Xarm_robot
 #self.num_dof = number of joint of type 0 (revolute) type 4 is fixed
 #self.drivingJoints = list of type 0 joints id
 
-class XarmEnv(gym.Env):
+class XarmEnv_img(gym.Env):
     metadata = {'render.modes': ['human']}
     
     def __init__(self):
@@ -44,9 +44,10 @@ class XarmEnv(gym.Env):
         # self.action_space = gym.spaces.box.Box(low = np.array([-1]*4, dtype=np.float32), high = np.array([1]*4, dtype=np.float32))
         low_bound = np.array([-10,-10,-0.5,-10,-10,-0.5,0], dtype=np.float32)  #[robotpos3+gripperpos3+gripper width]
         high_bound = np.array([10,10,5,10,10,5,1.5], dtype=np.float32)
-        self.observation_space = gym.spaces.box.Box(low = low_bound, high = high_bound)
 
-        #
+        # self.observation_space = gym.spaces.box.Box(low = low_bound, high = high_bound)
+
+        self.observation_space = gym.spaces.box.Box(low=0, high=5, shape=(64,64), dtype=np.uint8)  #segmentation
         #p.resetDebugVisualizerCamera(cameraDistance=1.5, cameraYaw=0, cameraPitch=-40, cameraTargetPosition=[0.55,-0.35,0.2])
         self.xarm_id = p.loadURDF(f"{self.resourcesDir}/urdf/xarm7_g/xarm7_with_gripper.urdf", [0, 0, 0.5], useFixedBase=True)
         self.driving_joints = [1,2,3,4,5,6,7,10,11,12,13,14,15]
@@ -69,8 +70,8 @@ class XarmEnv(gym.Env):
         current_pos, current_obj,dist_fing = self.getObservation()
         reward = self.calculateReward()
        
-        self.observation = np.concatenate((current_pos, dist_fing , current_obj), axis=None, dtype=np.float32)
-
+        # self.observation = np.concatenate((current_pos, dist_fing , current_obj), axis=None, dtype=np.float32)
+        self.observation = self.getObservationImg()
         if self.current_timeStep > 500:
             print("step     500")
             self.done = True
@@ -300,7 +301,7 @@ class XarmEnv(gym.Env):
         print(self.base_position,"*****",self.base_orientation)
         self.object_id = self.add_noodle(pos = self.base_position, orientation=self.base_orientation)
         
-        self.observation =  self.getObservation()
+        self.observation =  self.getObservationImg()
 
         self.distance_obj_start_x = self.getDistance(self.observation[1][0], self.observation[0][0])
         self.distance_obj_start_y = self.getDistance(self.observation[1][1], self.observation[0][1])
@@ -323,7 +324,7 @@ class XarmEnv(gym.Env):
         current_pose = self.Xarm.getLinkPose(self.eef_id)
         # current_pos = np.array(current_pose[0])
         
-        self.observation = np.concatenate((current_pose[0], 0 , self.base_position), axis=None, dtype=np.float32)
+        # self.observation = np.concatenate((current_pose[0], 0 , self.base_position), axis=None, dtype=np.float32)
 
         for i in range(1,100):  #wait until obj fall
             p.stepSimulation()
@@ -409,16 +410,26 @@ class XarmEnv(gym.Env):
                                               viewMatrix=view_matrix,
                                               projectionMatrix=proj_matrix,
                                               renderer=p.ER_BULLET_HARDWARE_OPENGL,
-                                              flags = p.ER_SEGMENTATION_MASK_OBJECT_AND_LINKINDEX
+                                            #   flags = p.ER_SEGMENTATION_MASK_OBJECT_AND_LINKINDEX
                                             )
         # print("segmentation buffer",seg_buf.shape)
         rgb_array = np.array(px, dtype=np.uint8)
         rgb_array = np.reshape(rgb_array, (width,height, 4))
 
         rgb_array = rgb_array[:, :, :3]
-        return seg_buf
+        return px
     
-    
+    def getObservationImg(self):
+        px = self.render()
+        # resized_screen = cv2.resize(px, (84, 84), interpolation=cv2.INTER_AREA)
+        gray_image = cv2.cvtColor(px, cv2.COLOR_RGB2GRAY)
+        ret,thresh = cv2.threshold(gray_image,.59,0,cv2.THRESH_TOZERO)
+
+        for i in range(thresh.shape[0]):    #convert to binary image
+            for j in range(thresh.shape[1]):
+                if thresh[i][j]>0.59:
+                    thresh[i][j] = 255
+        return thresh.astype(np.uint8)
 
     def close(self):
         p.disconnect()

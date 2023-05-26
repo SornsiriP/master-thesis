@@ -1,6 +1,7 @@
 import gym
 import torch
 from simple_xarm.envs.xarm_env import XarmEnv
+from simple_xarm.envs.xarm_env_img import XarmEnv_img
 from stable_baselines3 import PPO,SAC
 from stable_baselines3.common.env_checker import check_env
 from stable_baselines3.common.vec_env import VecNormalize, DummyVecEnv, VecEnv, SubprocVecEnv
@@ -14,9 +15,11 @@ import torch as th
 #tensorboard --logdir ./Mlp_log/
 def main():
   log_dir = "./Mlp_log"
-  env = XarmEnv()
+  # env = XarmEnv()
+  env = XarmEnv_img()
   # n_envs = 4 # Number of copies of the environment
   # env_list = [XarmEnv() for _ in range(4)]
+  
   # env = SubprocVecEnv([lambda: env] * n_envs)
   # env = VecNormalize(env, norm_obs=True, norm_reward=True, clip_obs=10.)
   # env = DummyVecEnv([lambda: env])
@@ -25,15 +28,15 @@ def main():
   env = Monitor(env,log_dir)
   # env = img_obs(env)
 
-  prefix_first = "PPO_normal_random_start_tanh"
+  prefix_first = "PPO_seg_random_start1"
   prefix_cont  = prefix_first + "_grab"
   timestep = 2000000
 
   zip_name = "/PPO_normal_random_start_tanh_700000_steps.zip"
 
 
-  # model = first_train(env,log_dir,prefix_first,timestep)
-  model = cont_train(env,log_dir,prefix_first,zip_name,timestep)
+  model = first_train(env,log_dir,prefix_first,timestep)
+  # model = cont_train(env,log_dir,prefix_first,zip_name,timestep)
   # model = cont_train_no_reset_timestep(env,log_dir,prefix_cont,zip_name,timestep)
 
   #while True:
@@ -47,9 +50,9 @@ def main():
   env.close()
 
 def first_train(env,log_dir,prefix,timestep): 
-  policy_kwargs = dict(activation_fn=th.nn.Tanh, net_arch=[512, 512])   #policy_kwargs=policy_kwargs, 
+  policy_kwargs = dict(activation_fn=th.nn.LeakyReLU, net_arch=[512, 512])   #policy_kwargs=policy_kwargs, 
   checkpoint_callback = CheckpointCallback(save_freq=50000, save_path=log_dir, name_prefix=prefix)
-  model = PPO('MlpPolicy', env, verbose=1,learning_rate = 0.0001,batch_size=10,gamma=0.995,tensorboard_log=log_dir,n_steps = 500,policy_kwargs=policy_kwargs)
+  model = PPO('MlpPolicy', env, verbose=1,learning_rate = 0.0001,batch_size=10,gamma=0.995,tensorboard_log=log_dir,n_steps = 500,policy_kwargs=policy_kwargs, )
   # model = PPO('CnnPolicy', env, verbose=1,learning_rate = 0.00025,batch_size=8,gamma=0.999,tensorboard_log=log_dir,n_steps = 1000,policy_kwargs=dict(normalize_images=False))
 
   # model = SAC('CnnPolicy', env, verbose=1,learning_rate = 0.00025,batch_size=8,gamma=0.999,tensorboard_log=log_dir,train_freq = 1)
@@ -79,7 +82,8 @@ def cont_train_no_reset_timestep(env,log_dir,prefix_cont,zip_name,timestep):
 def img_obs(env):
   env = ProcessFrame84(env)  #for image
   env = DummyVecEnv([lambda: env]) 
-  env = VecNormalize(env, norm_obs=True, norm_reward=True, clip_obs=10.)
+  env = VecNormalize(env, norm_obs=False, norm_reward=True, clip_obs=10.)
+  # env = VecNormalize(env)
   return env
   #img obs change to map action 0.2->0.3 to make it faster training
 

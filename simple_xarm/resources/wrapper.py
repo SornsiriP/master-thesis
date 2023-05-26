@@ -9,16 +9,21 @@ class ProcessFrame84(gym.ObservationWrapper):
     def __init__(self, env=None):
         super(ProcessFrame84, self).__init__(env)
         self.env = env
+        self.observation_space = gym.spaces.box.Box(
+            low=0, high=5, shape=(64,64), dtype=np.uint8)
         # self.observation_space = gym.spaces.Box(
-            # low=0, high=255, shape=(3, 84, 84), dtype=np.uint8)
-        self.observation_space = gym.spaces.Box(
-            low=0, high=1, shape=(84, 84), dtype=np.uint8)
+            # low=0, high=255, shape=(1,84, 84), dtype=np.uint8)
 
     def observation(self, obs):
-        return ProcessFrame84.process(self.env.render(mode='rgb_array'))
+        # return ProcessFrame84.process(self.env.render(mode='rgb_array'))
+        return ProcessFrame84.segment(self.env.render(mode='rgb_array'))
+
+    def segment(segment):
+        return segment.astype(np.uint8)
 
     def process(frame):
-        #print(frame.shape)
+        segmented = frame[1]
+        frame = frame[0]
         width = 300
         height = 300
         if frame.size == width * height * 3:
@@ -34,20 +39,23 @@ class ProcessFrame84(gym.ObservationWrapper):
         resized_screen = cv2.resize(
             img, (84, 84), interpolation=cv2.INTER_AREA)
         gray_image = cv2.cvtColor(resized_screen, cv2.COLOR_RGB2GRAY)
-        ret,thresh = cv2.threshold(gray_image,.59,1,cv2.THRESH_TOZERO)
+        ret,thresh = cv2.threshold(gray_image,.59,0,cv2.THRESH_TOZERO)
         # cv2.imshow("camera",np.array(resized_screen, dtype = np.uint8 ))
         # cv2.waitKey(1)
 
         for i in range(thresh.shape[0]):    #convert to binary image
             for j in range(thresh.shape[1]):
                 if thresh[i][j]>0.59:
-                    thresh[i][j] = 1
-
-        y_t = np.moveaxis(resized_screen, 2, 0)
+                    thresh[i][j] = 255
+        # thresh = np.reshape(thresh, [84, 84,1])
+        # thresh = np.moveaxis(thresh, 2, 0)
+        # y_t = np.moveaxis(resized_screen, 2, 0)
         # print("y_t", y_t.shape)
 
+        # print(segmented.shape)
         # return y_t.astype(np.uint8)
-        return thresh
+        return segmented.astype(np.uint8)
+        return thresh.astype(np.uint8)
 
 class ImageToPyTorch(gym.ObservationWrapper):
     def __init__(self, env):
