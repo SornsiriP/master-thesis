@@ -47,7 +47,7 @@ class XarmEnv_img(gym.Env):
 
         # self.observation_space = gym.spaces.box.Box(low = low_bound, high = high_bound)
 
-        self.observation_space = gym.spaces.box.Box(low=0, high=5, shape=(64,64), dtype=np.uint8)  #segmentation
+        self.observation_space = gym.spaces.box.Box(low=0, high=1, shape=(64,64), dtype=np.uint8)  #segmentation
         #p.resetDebugVisualizerCamera(cameraDistance=1.5, cameraYaw=0, cameraPitch=-40, cameraTargetPosition=[0.55,-0.35,0.2])
         self.xarm_id = p.loadURDF(f"{self.resourcesDir}/urdf/xarm7_g/xarm7_with_gripper.urdf", [0, 0, 0.5], useFixedBase=True)
         self.driving_joints = [1,2,3,4,5,6,7,10,11,12,13,14,15]
@@ -428,7 +428,9 @@ class XarmEnv_img(gym.Env):
         for i in range(thresh.shape[0]):    #convert to binary image
             for j in range(thresh.shape[1]):
                 if thresh[i][j]>0.59:
-                    thresh[i][j] = 255
+                    thresh[i][j] = 1
+        # thresh = np.reshape(thresh, [1,64, 64])
+        # print(thresh)
         return thresh.astype(np.uint8)
 
     def close(self):

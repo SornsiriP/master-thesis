@@ -71,8 +71,8 @@ class XarmEnv(gym.Env):
        
         self.observation = np.concatenate((current_pos, dist_fing , current_obj), axis=None, dtype=np.float32)
 
-        if self.current_timeStep > 500:
-            print("step     500")
+        if self.current_timeStep > 300:
+            print("step     300")
             self.done = True
             self.current_timeStep =0
             reward = -100/4*0.6 /2
@@ -386,8 +386,8 @@ class XarmEnv(gym.Env):
         return id
 
     def render(self, mode='human'):
-        width = 64
-        height = 64
+        width = 100
+        height = 100
         current_pos,_,_ = self.getObservation()
         current_pos[0] =current_pos[0]+2    #x
         current_pos[2] =current_pos[2]+2    #z
@@ -413,10 +413,10 @@ class XarmEnv(gym.Env):
                                             )
         # print("segmentation buffer",seg_buf.shape)
         rgb_array = np.array(px, dtype=np.uint8)
-        rgb_array = np.reshape(rgb_array, (width,height, 4))
+        rgb_array = np.reshape(rgb_array, (width, height, 4))
 
         rgb_array = rgb_array[:, :, :3]
-        return seg_buf
+        return rgb_array
     
     
 

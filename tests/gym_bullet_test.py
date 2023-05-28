@@ -8,6 +8,7 @@ from stable_baselines3.common.callbacks import CheckpointCallback
 from stable_baselines3.common.monitor import Monitor
 from simple_xarm.resources.wrapper import ProcessFrame84,ImageToPyTorch
 from stable_baselines3.common.evaluation import evaluate_policy
+from simple_xarm.envs.xarm_env_img import XarmEnv_img
 import pybullet as pb
 
 # from simple_xarm.resources.wrapper import ProcessFrame84,ImageToPyTorch
@@ -15,10 +16,11 @@ import pybullet as pb
 def main():
   log_dir = "./Mlp_log"
   env = XarmEnv()
+  # env = XarmEnv_img()
   # env = img_obs(env)
 
   SAC_result = "/test_env_custom_policy_rew_1000000_steps"
-  PPO_result = "/test_env_simple11_no_img_grab_550000_steps"
+  PPO_result = "/PPO_normal_random_300_400000_steps"
   New_start_pos = "/Xarm_SoftBody_grab_50000_steps"
 
   observation = env.reset()
