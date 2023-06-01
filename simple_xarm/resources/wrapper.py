@@ -32,11 +32,21 @@ class ProcessFrame84(gym.ObservationWrapper):
             assert False, "Unknown resolution."
         # img = img[:, :, 0] * 0.399 + img[:, :, 1] * 0.587 + \
         #       img[:, :, 2] * 0.114 #to one channel
-
-        #print(img.shape)
         resized_screen = cv2.resize(
             img, (64, 64), interpolation=cv2.INTER_AREA)
         gray_image = cv2.cvtColor(resized_screen, cv2.COLOR_RGB2GRAY)
+        # print(gray_image[0])
+        # img = self.threshold(gray_image)  
+        gray_image = np.reshape(gray_image, [64, 64, 1])
+        y_t = np.moveaxis(gray_image, 2, 0)
+        # print("y_t", y_t.shape)
+
+        # print(segmented.shape)
+        # return y_t.astype(np.uint8)
+        
+        return y_t
+    
+    def threshold(gray_image):
         ret,thresh = cv2.threshold(gray_image,.59,0,cv2.THRESH_TOZERO)
         # cv2.imshow("camera",np.array(resized_screen, dtype = np.uint8 ))
         # cv2.waitKey(1)
@@ -47,12 +57,6 @@ class ProcessFrame84(gym.ObservationWrapper):
                     thresh[i][j] = 255
         thresh = np.reshape(thresh, [64, 64,1])
         thresh = np.moveaxis(thresh, 2, 0)
-        # y_t = np.moveaxis(resized_screen, 2, 0)
-        # print("y_t", y_t.shape)
-
-        # print(segmented.shape)
-        # return y_t.astype(np.uint8)
-        return thresh.astype(np.uint8)
         return thresh.astype(np.uint8)
 
 class ImageToPyTorch(gym.ObservationWrapper):

@@ -171,7 +171,7 @@ class XarmEnv(gym.Env):
         else: 
             if (current_pos[2]>0.1 and dist_fing>.7) or (current_pos[2]<0.1 and dist_fing<.8):   
             # if dist_fing>.7:
-                reward_gripper = 0.1
+                reward_gripper = (0.8 - dist_fing )
             else:reward_gripper = 0
 
         penalty_time = self.current_timeStep * 0.00001        
@@ -344,9 +344,9 @@ class XarmEnv(gym.Env):
         ori_y = np.random.uniform(0.2, .5)
         ori_z = np.random.uniform(0, .1)
         ori_w = np.random.uniform(0, .1)
-        position = [pos_x,pos_y,pos_z]
+        # position = [pos_x,pos_y,pos_z]
         # orientation = [ori_x,ori_y,ori_z,ori_w]
-        # position = [2.5,0,0]
+        position = [2.5,-0.2,0]
         orientation = [0.22,0.2,0,0]
         # position = [3,0,0]
         # orientation = [0.2,0.2,0,0]
