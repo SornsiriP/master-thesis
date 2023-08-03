@@ -44,7 +44,7 @@ class XarmEnv(gym.Env):
         # self.action_space = gym.spaces.box.Box(low = np.array([-1]*4, dtype=np.float32), high = np.array([1]*4, dtype=np.float32))
         low_bound = np.array([-10,-10,-0.5,-10,-10,-0.5,0], dtype=np.float32)  #[robotpos3+gripperpos3+gripper width]
         high_bound = np.array([10,10,5,10,10,5,1.5], dtype=np.float32)
-        self.observation_space = gym.spaces.box.Box(low = low_bound, high = high_bound)
+        self.observation_space = gym.spaces.box.Box(low = low_bound, high = high_bound,shape = (7,))
 
         #
         #p.resetDebugVisualizerCamera(cameraDistance=1.5, cameraYaw=0, cameraPitch=-40, cameraTargetPosition=[0.55,-0.35,0.2])
@@ -54,12 +54,23 @@ class XarmEnv(gym.Env):
         self.joint_goal = [0]*self.num_dof
         self.current_timeStep = 0
         self.Xarm = Xarm_robot(self.xarm_id)
+        self.going_Up = 0
     
     def step(self, action):
         
         self.current_timeStep+=1
         p.configureDebugVisualizer(p.COV_ENABLE_SINGLE_STEP_RENDERING)
         action = self.mapAction(action)
+        
+        # if self.objMaxHeight() > 0.
+
+        if self.isGraspingPosition():
+            print(self.objMaxHeight())
+            # new_pos[2] = 0.5
+            action[:3] = [0,0,1.5]
+            dgripper = 0
+            # print(dgripper)
+        # print(dgripper)
         new_pos,dgripper = self.getNewPos(action)
         self.Xarm.setPose(new_pos,self.initial_eef_q4,self.eef_id,grip_width=dgripper)
         p.stepSimulation()
@@ -71,21 +82,26 @@ class XarmEnv(gym.Env):
        
         self.observation = np.concatenate((current_pos, dist_fing , current_obj), axis=None, dtype=np.float32)
 
+        if current_obj[2] > 0.2:
+            self.going_Up = 1
+
         if self.current_timeStep > 300:
             print("step     300")
             self.done = True
             self.current_timeStep =0
-            reward = -100/4*0.6 /2
-        elif current_obj[2] > 3: 
-            print(" object z > 3", current_obj[2])
+            if self.going_Up == 1:
+                reward = -5
+            else: reward = -10
+        elif current_obj[2] > 1: 
+            print(" object z > 1", current_obj[2])
             self.done = True
             self.current_timeStep =0
-            reward = 1000/4*0.8
+            reward = 100
         elif len(p.getContactPoints(self.object_id,self.xarm_id)) > 100:     #Softbody crash #new reward dont have minus
             print("Soft body crash")
             self.done = True
             self.current_timeStep =0
-            reward = -100/4*0.8
+            reward = -20
 
         return self.observation, reward, self.done, dict()
         
@@ -130,10 +146,10 @@ class XarmEnv(gym.Env):
         distance_obj_goal = self.getDistance(goal_z, obj_height) + 0.1
         reward_distance_obj_goal = (goal_z-distance_obj_goal)*3    #off set score
 
-        left_lower_bound = current_obj-(1,2,0.1)
-        left_upper_bound = current_obj+(1,0.0,0.3)
-        right_lower_bound = current_obj-(1,0.0,0.1)
-        right_upper_bound = current_obj+(1,2,0.3)
+        left_lower_bound = current_obj-(3,1,0.1)
+        left_upper_bound = current_obj+(3,0.0,0.3)
+        right_lower_bound = current_obj-(3,0.0,0.1)
+        right_upper_bound = current_obj+(3,1,0.3)
 
         # p.addUserDebugLine(left_lower_bound,left_upper_bound, lifeTime = 0.1)
         # p.addUserDebugLine(right_lower_bound,right_upper_bound, lifeTime = 0.1)
@@ -163,12 +179,14 @@ class XarmEnv(gym.Env):
             # print(len(p.getContactPoints(self.object_id,self.plane_id)))
         if len(p.getContactPoints(self.object_id,self.xarm_id)) >= 17 and dist_fing < .6:    #1gripper touch is more than 2!
             reward_gripper = (1.5-dist_fing) #0=open
+            self.setGripperFriction(10)
             if self.current_timeStep % 30 == 0:
                 if dist_fing<0.7:
                     print("************grab**********")
             if (left_lower_bound < left_finger).all() and (left_finger< left_upper_bound).all() and (right_lower_bound < (right_finger)).all() and (right_finger < right_upper_bound).all():
                 reward_gripper = reward_gripper*2
         else: 
+            self.setGripperFriction(1)
             if (current_pos[2]>0.1 and dist_fing>.7) or (current_pos[2]<0.1 and dist_fing<.8):   
             # if dist_fing>.7:
                 reward_gripper = (0.8 - dist_fing )
@@ -178,7 +196,7 @@ class XarmEnv(gym.Env):
         # reward = reward_distance_obj_goal + reward_gripper*2 + reward_distance_gripper_obj/5
         reward = reward_distance_gripper_obj + reward_gripper*2
         # reward = reward_distance_gripper_obj + reward_distance_obj_goal + reward_gripper + reward_distance_obj_original
-        Norm_reward = self.RewardNorm(reward) + reward_distance_obj_goal
+        Norm_reward = self.RewardNorm(reward) + reward_distance_obj_goal*10
 
 
         if self.current_timeStep % 30 == 0:
@@ -194,6 +212,32 @@ class XarmEnv(gym.Env):
             print("Norm reward",Norm_reward)
 
         return Norm_reward
+    
+    def isGraspingPosition(self):
+        _, current_obj,_ = self.getObservation()
+        left_lower_bound = current_obj-(5,1,0.1)
+        left_upper_bound = current_obj+(5,0.0,0.3)
+        right_lower_bound = current_obj-(5,0.0,0.1)
+        right_upper_bound = current_obj+(5,1,0.3)
+
+        left_finger = p.getLinkState(self.xarm_id,11)[0]
+        right_finger = p.getLinkState(self.xarm_id,14)[0]
+
+        cond1 = len(p.getContactPoints(self.object_id,self.xarm_id)) >= 10
+        cond2 = self.objMaxHeight() > 0.105  
+        cond3 = (left_lower_bound < left_finger).all() and (left_finger< left_upper_bound).all() and (right_lower_bound < (right_finger)).all() and (right_finger < right_upper_bound).all()
+        inGrapingPosition = cond1 and cond2 and cond3 
+        return inGrapingPosition
+
+    def setGripperFriction(self, friction):
+        p.changeDynamics(self.xarm_id,8, lateralFriction = friction)
+        p.changeDynamics(self.xarm_id,9, lateralFriction = friction)
+        p.changeDynamics(self.xarm_id,10, lateralFriction = friction)
+        p.changeDynamics(self.xarm_id,11, lateralFriction = friction)
+        p.changeDynamics(self.xarm_id,12, lateralFriction = friction)
+        p.changeDynamics(self.xarm_id,13, lateralFriction = friction)
+        p.changeDynamics(self.xarm_id,14, lateralFriction = friction)
+        
 
     def RewardNorm(self,reward):
         if reward > 0:
@@ -277,7 +321,7 @@ class XarmEnv(gym.Env):
         # p.resetSimulation()
         p.configureDebugVisualizer(p.COV_ENABLE_RENDERING,0) # we will enable rendering after we loaded everything
         p.setAdditionalSearchPath(pybullet_data.getDataPath()) # ref to pybullet_data
-        p.setGravity(0,0,-10)
+        p.setGravity(0,0,-5)
 
         # self.xarm_id = p.loadURDF(f"{self.resourcesDir}/urdf/xarm7_g/xarm7_with_gripper.urdf", [0, 0, 0.5], useFixedBase=True)
         self.xarm_id = p.loadURDF(f"{self.resourcesDir}/urdf/xarm7_g/xarm7_with_gripper.urdf", [0, 0, 0], useFixedBase=True,globalScaling=10)
@@ -310,10 +354,9 @@ class XarmEnv(gym.Env):
         
         # self.Xarm.reset()
         # #reset the env to initial state
-        
-
-        self.plane_id = p.loadURDF("plane.urdf", [0, 0, 0], useFixedBase=True)
-        
+        self.Xarm.setInitPose()
+        self.plane_id = p.loadURDF("simple_xarm/resources/urdf/whiteplane.urdf", [0, 0, -.01], useFixedBase=True)
+        # self.plane_id = p.loadURDF("plane.urdf", [0, 0, 0], useFixedBase=True)
         #print(f"{p.getLinkState(self.xarm_id,0)}")
         # p.changeDynamics(self.object_id, -1,mass=0.1, lateralFriction=100)
         #p.changeDynamics(self.xarm_id, 11, lateralFriction=0.9,spinningFriction=1.9, rollingFriction=1.9)
@@ -325,11 +368,10 @@ class XarmEnv(gym.Env):
         
         self.observation = np.concatenate((current_pose[0], 0 , self.base_position), axis=None, dtype=np.float32)
 
-        for i in range(1,100):  #wait until obj fall
+        for i in range(1,50):  #wait until obj fall
             p.stepSimulation()
         self.current_timeStep=0
         
-        self.Xarm.setInitPose()
         # self.observation = np.array([1]*7)
         # print("observe" ,self.observation)
 
@@ -339,14 +381,14 @@ class XarmEnv(gym.Env):
     def random_start(self):
         pos_x = np.random.uniform(2, 3)
         pos_y = np.random.uniform(-2, 2)
-        pos_z = 0
-        ori_x = np.random.uniform(0.2, .5)
-        ori_y = np.random.uniform(0.2, .5)
-        ori_z = np.random.uniform(0, .1)
-        ori_w = np.random.uniform(0, .1)
-        # position = [pos_x,pos_y,pos_z]
+        pos_z = -.35
+        ori_x = np.random.uniform(.2, .3)
+        ori_y = np.random.uniform(.1, .3)
+        ori_z = np.random.uniform(0, 0)
+        ori_w = np.random.uniform(0, 0)
+        position = [pos_x,pos_y,pos_z]
         # orientation = [ori_x,ori_y,ori_z,ori_w]
-        position = [2.5,-0.2,0]
+        # position = [2.5,-0.2,-.2]
         orientation = [0.22,0.2,0,0]
         # position = [3,0,0]
         # orientation = [0.2,0.2,0,0]
@@ -361,7 +403,7 @@ class XarmEnv(gym.Env):
             baseOrientation = orientation,  
             scale= 1, 
             mass = 2, 
-            collisionMargin=0.005,
+            collisionMargin=0.01,
             # useMassSpring=0,
             useBendingSprings=1,
             springBendingStiffness = 0.001,

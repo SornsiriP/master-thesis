@@ -155,14 +155,17 @@ class XarmIK(gym.Env):
         # self.object_id = p.loadSoftBody("RopeNew.obj", simFileName = "tet.vtk", basePosition = [5,-0.1,1],baseOrientation = [0,0,0,1], scale =1, mass = 1, 
         # useBendingSprings = 1,springBendingStiffness = 1, useNeoHookean = 1, NeoHookeanMu = 500, NeoHookeanLambda = 1000, NeoHookeanDamping = 0.002, useSelfCollision = 1, frictionCoeff = 3, collisionMargin = 0.001)
         # p.changeVisualShape(self.object_id,-1, rgbaColor =[0,0,0,1])        # self.object_id = self.add_noodle(pos = [2,-3,1], orientation=[0.5,0,0,1])
-        self.object_id= self.add_noodle(pos = [7,-3,1], orientation=[0,0,.5,1])
+        self.object_id= self.add_noodle(pos = [10,0,1], orientation=[0.22,0.2,0,0])
+
+
+
         # base_position, base_orientation = self.random_start() 
         # print(base_position,"*****",base_orientation)
         # self.object_id = self.add_noodle(pos = base_position, orientation=base_orientation)
         # self.add_noodle(pos = [3,3,.3], orientation=[0,0,0,1])
 
-        # p.createSoftBodyAnchor(self.object_id  ,1,-1,-1)
-        # p.createSoftBodyAnchor(self.object_id  ,500,-1,-1)
+        p.createSoftBodyAnchor(self.object_id  ,1,-1,0,[0,0,10])
+        p.createSoftBodyAnchor(self.object_id  ,500,-1,-1)
         # p.createSoftBodyAnchor(self.object_id  ,0,0,0)
 
         print(f"{p.getLinkState(self.xarm_id,0)}")

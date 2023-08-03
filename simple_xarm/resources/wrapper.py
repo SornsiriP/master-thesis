@@ -35,6 +35,8 @@ class ProcessFrame84(gym.ObservationWrapper):
         resized_screen = cv2.resize(
             img, (64, 64), interpolation=cv2.INTER_AREA)
         gray_image = cv2.cvtColor(resized_screen, cv2.COLOR_RGB2GRAY)
+        # cv2.imshow("camera",np.array(gray_image, dtype = np.uint8 ))
+        # cv2.waitKey(1)
         # print(gray_image[0])
         # img = self.threshold(gray_image)  
         gray_image = np.reshape(gray_image, [64, 64, 1])
@@ -42,9 +44,8 @@ class ProcessFrame84(gym.ObservationWrapper):
         # print("y_t", y_t.shape)
 
         # print(segmented.shape)
-        # return y_t.astype(np.uint8)
+        return y_t.astype(np.uint8)
         
-        return y_t
     
     def threshold(gray_image):
         ret,thresh = cv2.threshold(gray_image,.59,0,cv2.THRESH_TOZERO)
