@@ -11,20 +11,20 @@ import pybullet as pb
 # from simple_xarm.resources.wrapper import ProcessFrame84,ImageToPyTorch
 #tensorboard --logdir ./Mlp_log/
 def main():
-  log_dir = "./Mlp_log"
+  log_dir = "./Model"
   env = XarmEnv()
 
   #To test image observation model
-  env = img_obs(env)
+  # env = img_obs(env)
 
-  SAC_result = "/SAC_img_random_300_1_400000_steps"
-  # PPO_result = "/PPO_normal_random_300_1_400000_steps"
+  # SAC_result = "/SAC_img/SAC_img_random_300_250000_steps"
+  PPO_result = "/PPO_direct/PPO_normal_random_300_no_randorien_400000_steps"
 
   rKey = ord('r')
 
   observation = env.reset()
-  # model = PPO.load(log_dir + PPO_result)
-  model = SAC.load(log_dir + SAC_result)
+  model = PPO.load(log_dir + PPO_result)
+  # model = SAC.load(log_dir + SAC_result)
 
   while True:
     env.render()

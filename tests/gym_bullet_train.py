@@ -14,7 +14,7 @@ import torch as th
 #tensorboard --logdir ./Mlp_log/
 
 def main():
-  log_dir = "./Mlp_log"
+  log_dir = "./Model"
   env = XarmEnv()
   env = Monitor(env,log_dir)
 
