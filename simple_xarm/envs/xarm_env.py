@@ -285,8 +285,6 @@ class XarmEnv(gym.Env):
         
         self.Xarm.setInitPose()
         self.plane_id = p.loadURDF("simple_xarm/resources/urdf/whiteplane.urdf", [0, 0, -.01], useFixedBase=True)
-        #p.changeDynamics(self.xarm_id, 11, lateralFriction=0.9,spinningFriction=1.9, rollingFriction=1.9)
-        #p.changeDynamics(self.xarm_id, 14, lateralFriction=0.9,spinningFriction=1.9, rollingFriction=.9)
         p.configureDebugVisualizer(p.COV_ENABLE_RENDERING,1)
         
         current_pose = self.Xarm.getLinkPose(self.eef_id)
@@ -317,7 +315,7 @@ class XarmEnv(gym.Env):
         return position,orientation
 
     def add_noodle(self, pos, orientation):
-        filename = "800.vtk"
+        filename = "RopeNew.vtk"
         id = p.loadSoftBody("RopeNew.obj",
             simFileName=filename,
             basePosition=pos,
@@ -330,8 +328,6 @@ class XarmEnv(gym.Env):
             useBendingSprings=1,
             springBendingStiffness = 0.001,
             useNeoHookean=1,
-            # NeoHookeanMu = 1100, 
-            # NeoHookeanLambda = 900,
             NeoHookeanMu = 2000,         #stiffness/elastic modulus/shear deformation  /the more it resists shear deformation
             NeoHookeanLambda = 1500,     #High: make shape more stable (compressibility)/volumetric deformation.
             NeoHookeanDamping = 0.1,
